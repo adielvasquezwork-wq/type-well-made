@@ -167,16 +167,11 @@
     text-wrap: pretty;
   }
 
-  h1 {
-    font-size: inherit;
-    font-weight: 500;
-    text-wrap: balance;
-  }
-
+  h1,
   h2,
   h3 {
     font-size: inherit;
-    font-weight: 600;
+    font-weight: 500;
     text-wrap: balance;
   }
 
