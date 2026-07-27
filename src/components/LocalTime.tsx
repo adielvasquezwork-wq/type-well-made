@@ -18,7 +18,7 @@ export function LocalTime({ timeZone = "America/Denver" }: { timeZone?: string }
 
   return (
     <span
-      className={`font-mono text-[0.82em] tabular-nums transition-opacity duration-700 ease-quiet ${
+      className={`tabular-nums transition-opacity duration-300 ease-strong ${
         time ? "opacity-100" : "opacity-0"
       }`}
     >

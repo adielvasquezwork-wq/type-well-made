@@ -38,6 +38,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-prose: var(--prose);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
@@ -48,14 +49,20 @@
   --color-hairline: var(--hairline);
   --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --ease-quiet: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --animate-rise: rise 0.9s var(--ease-quiet) both;
+
+  /*
+   * Interaction is quick — hover feedback lands in 150ms, the entrance in
+   * about half a second. Slower than this and the page feels like it is
+   * performing rather than responding.
+   */
+  --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-rise: rise 0.55s var(--ease-strong) both;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -78,7 +85,14 @@
   --secondary: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
   --secondary-foreground: var(--foreground);
   --muted: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
-  --muted-foreground: light-dark(oklch(0.58 0.007 75), oklch(0.65 0.006 80));
+
+  /*
+   * Two tiers of grey, the way fennell.cv splits #555 from #999. --prose is
+   * running text: dark enough to read as body copy rather than as a caption.
+   * --muted-foreground is tertiary — list rows, labels, the footer.
+   */
+  --prose: light-dark(oklch(0.44 0.008 70), oklch(0.755 0.006 82));
+  --muted-foreground: light-dark(oklch(0.585 0.007 75), oklch(0.66 0.006 80));
   --accent: light-dark(oklch(0.55 0.13 38), oklch(0.68 0.13 40));
   --accent-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
   --destructive: light-dark(oklch(0.55 0.19 27), oklch(0.65 0.18 27));
@@ -86,10 +100,10 @@
   --border: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 12%));
   --hairline: light-dark(oklch(0.9 0.005 85), oklch(1 0 0 / 9%));
   --input: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 15%));
-  --ring: light-dark(oklch(0.58 0.007 75), oklch(0.65 0.006 80));
+  --ring: light-dark(oklch(0.585 0.007 75), oklch(0.66 0.006 80));
 
   /* Paper tooth. Reads heavier on ink, so dark gets a touch more. */
-  --grain-opacity: 0.05;
+  --grain-opacity: 0.045;
 }
 
 .light {
@@ -98,12 +112,12 @@
 
 .dark {
   color-scheme: dark;
-  --grain-opacity: 0.075;
+  --grain-opacity: 0.06;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --grain-opacity: 0.075;
+    --grain-opacity: 0.06;
   }
 }
 
@@ -124,6 +138,12 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    /*
+     * Instrument Sans is variable (400..700). 450 is the body: a hair sturdier
+     * than book weight, which is what holds a 14px page together without
+     * anything being set large. Emphasis is 550, never a size jump.
+     */
+    font-weight: 450;
     font-feature-settings: "ss01", "calt";
     caret-color: var(--color-accent);
   }
@@ -150,6 +170,8 @@
   h1,
   h2,
   h3 {
+    font-size: inherit;
+    font-weight: 550;
     text-wrap: balance;
   }
 
@@ -159,8 +181,8 @@
 
   :focus-visible {
     outline: 1.5px solid var(--color-accent);
-    outline-offset: 4px;
-    border-radius: 1px;
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
   /* Keyboard users get the ring; pointer users never see it. */
@@ -181,16 +203,20 @@
   }
 }
 
-/* Inline prose link: underlined, never a button. */
+/*
+ * Inline prose link: a dotted rule, never a button. Dotted rather than solid
+ * keeps a paragraph with four links in it from reading as four underlines.
+ */
 @utility link {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: var(--color-border);
-  text-underline-offset: 3px;
+  text-decoration-style: dotted;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  text-underline-offset: 2px;
   text-decoration-thickness: 1px;
   transition:
-    color 400ms var(--ease-quiet),
-    text-decoration-color 400ms var(--ease-quiet);
+    color 150ms var(--ease-strong),
+    text-decoration-color 150ms var(--ease-strong);
 
   &:hover {
     color: var(--color-accent);
@@ -203,6 +229,6 @@
  * assembles top-to-bottom instead of arriving all at once.
  */
 @utility rise-in {
-  animation: rise 0.85s var(--ease-quiet) both;
-  animation-delay: calc(var(--i, 0) * 65ms);
+  animation: rise 0.55s var(--ease-strong) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
 }

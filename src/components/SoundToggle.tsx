@@ -114,12 +114,12 @@ export function SoundToggle() {
       type="button"
       onClick={toggle}
       aria-pressed={on}
-      className="group inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-500 ease-quiet hover:text-foreground"
+      className="group inline-flex items-center gap-2 text-muted-foreground transition-colors duration-150 ease-strong hover:text-foreground"
     >
       <span
         aria-hidden
-        className={`inline-block size-[6px] rounded-full transition-all duration-700 ease-quiet ${
-          on ? "bg-accent scale-100" : "bg-border scale-90 group-hover:bg-muted-foreground"
+        className={`inline-block size-[6px] rounded-full transition-all duration-300 ease-strong ${
+          on ? "scale-100 bg-foreground" : "scale-90 bg-border group-hover:bg-muted-foreground"
         }`}
       />
       {on ? "Sound on" : "Sound off"}
