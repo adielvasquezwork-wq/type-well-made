@@ -47,7 +47,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-hairline: var(--hairline);
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   /*
@@ -139,12 +139,12 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     /*
-     * Instrument Sans is variable (400..700). 450 is the body: a hair sturdier
+     * Geist is variable (400..700). 450 is the body: a hair sturdier
      * than book weight, which is what holds a 14px page together without
-     * anything being set large. Emphasis is 550, never a size jump.
+     * anything being set large. Emphasis is 500-600, never a size jump.
      */
     font-weight: 450;
-    font-feature-settings: "ss01", "calt";
+    font-feature-settings: "calt";
     caret-color: var(--color-accent);
   }
 
@@ -167,11 +167,16 @@
     text-wrap: pretty;
   }
 
-  h1,
+  h1 {
+    font-size: inherit;
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
   h2,
   h3 {
     font-size: inherit;
-    font-weight: 550;
+    font-weight: 600;
     text-wrap: balance;
   }
 
