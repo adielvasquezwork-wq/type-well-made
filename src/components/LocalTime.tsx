@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-/** Live local time in Adiel's timezone — the page's small sign of life. */
-export function LocalTime({ timeZone = "America/Santo_Domingo" }: { timeZone?: string }) {
+/** Live local time — the page's small sign of life. */
+export function LocalTime({ timeZone = "America/Denver" }: { timeZone?: string }) {
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
@@ -10,7 +10,7 @@ export function LocalTime({ timeZone = "America/Santo_Domingo" }: { timeZone?: s
       minute: "2-digit",
       timeZone,
     });
-    const update = () => setTime(fmt.format(new Date()));
+    const update = () => setTime(fmt.format(new Date()).toLowerCase().replace(/\s/g, ""));
     update();
     const id = window.setInterval(update, 10_000);
     return () => window.clearInterval(id);
@@ -18,7 +18,7 @@ export function LocalTime({ timeZone = "America/Santo_Domingo" }: { timeZone?: s
 
   return (
     <span
-      className={`underline decoration-border underline-offset-[3px] transition-opacity duration-700 ease-quiet ${
+      className={`font-mono text-[0.82em] tabular-nums transition-opacity duration-700 ease-quiet ${
         time ? "opacity-100" : "opacity-0"
       }`}
     >
