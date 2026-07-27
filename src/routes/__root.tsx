@@ -18,9 +18,9 @@ const at = (i: number) => ({ "--i": i }) as CSSProperties;
 /** Shared shell for the two dead ends, so they read like the rest of the site. */
 function Message({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[34rem] flex-col justify-center px-6 pb-24 text-[0.95rem] leading-[1.8] tracking-[-0.006em] sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-[34rem] flex-col justify-center px-6 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-8">
       <p
-        className="rise-in font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted-foreground/70"
+        className="rise-in font-mono text-[0.72rem] tabular-nums text-muted-foreground/70"
         style={at(0)}
       >
         {label}
@@ -33,10 +33,10 @@ function Message({ label, children }: { label: string; children: ReactNode }) {
 function NotFoundComponent() {
   return (
     <Message label="404">
-      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+      <h1 className="rise-in mt-4" style={at(1)}>
         This page doesn’t exist.
       </h1>
-      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+      <p className="rise-in mt-2 text-prose" style={at(2)}>
         It may have moved, or the link that brought you here was already wrong.
       </p>
       <p className="rise-in mt-8" style={at(3)}>
@@ -57,10 +57,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <Message label="Error">
-      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+      <h1 className="rise-in mt-4" style={at(1)}>
         This page didn’t load.
       </h1>
-      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+      <p className="rise-in mt-2 text-prose" style={at(2)}>
         Something broke on the way here. Trying again usually settles it.
       </p>
       <p className="rise-in mt-8" style={at(3)}>
