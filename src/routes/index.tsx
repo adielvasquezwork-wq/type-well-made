@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Independent designer working with startups and studios on brands and websites with a clear point of view.",
+          "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
       },
     ],
   }),

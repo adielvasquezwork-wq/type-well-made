@@ -77,11 +77,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Adiel Vásquez" },
-      { name: "description", content: "Independent brand & web designer." },
+      { title: "Adiel Vásquez — Independent Brand & Web Designer" },
+      { name: "description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
       { name: "author", content: "Adiel Vásquez" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
+      { name: "twitter:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
+      { property: "og:description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
+      { name: "twitter:description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png" },
     ],
     links: [
       {
@@ -94,7 +100,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
 
