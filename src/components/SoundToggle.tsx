@@ -35,12 +35,15 @@ export function SoundToggle() {
     filter.Q.value = 0.3;
     filter.connect(master);
 
-    // Two detuned low sines: a warm, muted phone-like tone.
+    // Two detuned low sines: a warm, muted phone-like tone. A small random
+    // offset each time it's switched on keeps repeat listens from sounding
+    // like a loop.
+    const drift = Math.random() * 4 - 2;
     const oscs = [60, 85].map((freq, i) => {
       const osc = ctx.createOscillator();
       osc.type = "sine";
       osc.frequency.value = freq;
-      osc.detune.value = i * 3 - 1.5;
+      osc.detune.value = i * 3 - 1.5 + drift;
       const g = ctx.createGain();
       g.gain.value = i === 0 ? 0.08 : 0.05;
       osc.connect(g).connect(filter);
@@ -49,7 +52,7 @@ export function SoundToggle() {
     });
 
     const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.05;
+    lfo.frequency.value = 0.045 + Math.random() * 0.015;
     const lfoGain = ctx.createGain();
     lfoGain.gain.value = 60;
     lfo.connect(lfoGain).connect(filter.frequency);
@@ -83,21 +86,40 @@ export function SoundToggle() {
     }
   };
 
-  // Considered interaction sound: a single short, muted beep on link hover.
+  // Considered interaction sound: a short, filtered tick on link hover.
+  // Pitch and gain drift slightly each time so a row of six doesn't sound
+  // like a metronome, and a minimum gap keeps a fast sweep from turning
+  // into a clatter.
   useEffect(() => {
     if (!on) return;
+    const notes = [660, 740, 780, 830];
+    let lastTick = 0;
     const tick = () => {
       const { ctx, master } = ensureCtx();
+      const t = ctx.currentTime;
+      if (t - lastTick < 0.08) return;
+      lastTick = t;
+
       const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
       const g = ctx.createGain();
+
       osc.type = "sine";
-      osc.frequency.value = 720;
-      g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.04, ctx.currentTime + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
-      osc.connect(g).connect(master.context.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
+      const note = notes[Math.floor(Math.random() * notes.length)];
+      osc.frequency.value = note + (Math.random() * 6 - 3);
+
+      filter.type = "lowpass";
+      filter.frequency.value = 2200;
+      filter.Q.value = 0.4;
+
+      const peak = 0.028 + Math.random() * 0.012;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + 0.018);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+
+      osc.connect(filter).connect(g).connect(master.context.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
     };
     const handler = (e: Event) => {
       const el = e.target as HTMLElement | null;
