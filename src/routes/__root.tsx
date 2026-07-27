@@ -16,14 +16,11 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
 /** Shared shell for the two dead ends, so they read like the rest of the site. */
-function Message({ label, children }: { label: string; children: ReactNode }) {
+function Message({ mark, children }: { mark: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[34rem] flex-col justify-center px-6 pb-24 text-[0.95rem] leading-[1.8] tracking-[-0.006em] sm:px-8">
-      <p
-        className="rise-in font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted-foreground/70"
-        style={at(0)}
-      >
-        {label}
+    <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[62rem] flex-col justify-center px-6 pb-24 sm:px-10">
+      <p className="rise-in label text-muted-foreground/70" style={at(0)}>
+        <span className="text-accent">{mark}</span>
       </p>
       {children}
     </main>
@@ -32,14 +29,20 @@ function Message({ label, children }: { label: string; children: ReactNode }) {
 
 function NotFoundComponent() {
   return (
-    <Message label="404">
-      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+    <Message mark="404">
+      <h1
+        className="rise-in mt-6 max-w-[34rem] font-serif text-[clamp(1.9rem,5vw,3rem)] leading-[1.05] tracking-[-0.025em]"
+        style={at(1)}
+      >
         This page doesn’t exist.
       </h1>
-      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+      <p
+        className="rise-in mt-5 max-w-[30rem] text-[0.95rem] leading-[1.72] tracking-[-0.006em] text-foreground/70"
+        style={at(2)}
+      >
         It may have moved, or the link that brought you here was already wrong.
       </p>
-      <p className="rise-in mt-8" style={at(3)}>
+      <p className="rise-in mt-9 text-[0.95rem]" style={at(3)}>
         <Link className="link" to="/">
           Back to the index
         </Link>
@@ -56,14 +59,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <Message label="Error">
-      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+    <Message mark="Error">
+      <h1
+        className="rise-in mt-6 max-w-[34rem] font-serif text-[clamp(1.9rem,5vw,3rem)] leading-[1.05] tracking-[-0.025em]"
+        style={at(1)}
+      >
         This page didn’t load.
       </h1>
-      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+      <p
+        className="rise-in mt-5 max-w-[30rem] text-[0.95rem] leading-[1.72] tracking-[-0.006em] text-foreground/70"
+        style={at(2)}
+      >
         Something broke on the way here. Trying again usually settles it.
       </p>
-      <p className="rise-in mt-8" style={at(3)}>
+      <p className="rise-in mt-9 text-[0.95rem]" style={at(3)}>
         <button
           type="button"
           className="link"
@@ -136,7 +145,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap",
       },
     ],
   }),

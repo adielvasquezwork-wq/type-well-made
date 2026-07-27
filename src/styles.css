@@ -3,11 +3,11 @@
 @import "tw-animate-css";
 
 /*
- * Design system: text-first, near-monochrome personal site.
- * Ink on warm off-white, a single restrained accent (dry clay red).
+ * Design system: an editorial specimen page.
  *
- * Colour is expressed with light-dark(), so the palette follows the reader's
- * system preference on its own. `.light` / `.dark` on <html> force a scheme.
+ * Ink on warm off-white, one restrained accent (dry clay red). Three voices:
+ * a serif for display, a grotesque for reading, a mono for data and labels.
+ * The page also carries the light of Denver — see --wash, driven by local time.
  */
 
 @custom-variant dark {
@@ -46,8 +46,11 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-hairline: var(--hairline);
+
   --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
   --ease-quiet: cubic-bezier(0.22, 0.61, 0.36, 1);
   --animate-rise: rise 0.9s var(--ease-quiet) both;
 }
@@ -60,6 +63,15 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes wash-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -90,6 +102,14 @@
 
   /* Paper tooth. Reads heavier on ink, so dark gets a touch more. */
   --grain-opacity: 0.05;
+
+  /*
+   * Daylight. Set from the client once Denver's hour is known, so the page
+   * is tinted by the light where the work is actually made. Neutral until
+   * then, which also keeps SSR and hydration in agreement.
+   */
+  --wash: transparent;
+  --wash-strength: 0;
 }
 
 .light {
@@ -115,7 +135,6 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    /* Punctuation hangs into the margin so the text block optically aligns. */
     hanging-punctuation: first last;
   }
 
@@ -128,10 +147,19 @@
     caret-color: var(--color-accent);
   }
 
-  /*
-   * A single sheet of grain over everything. Fixed so it behaves like paper
-   * the page is printed on rather than something that scrolls with it.
-   */
+  /* The daylight wash — a soft dome of colour resting on the top of the page. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: var(--wash-strength);
+    background: radial-gradient(120% 70% at 50% -10%, var(--wash), transparent 70%);
+    transition: opacity 2.4s var(--ease-quiet);
+  }
+
+  /* A single sheet of grain over everything, like paper the page is printed on. */
   body::after {
     content: "";
     position: fixed;
@@ -142,7 +170,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Prose sets its own rag; headings should never leave a word stranded. */
   p {
     text-wrap: pretty;
   }
@@ -163,7 +190,6 @@
     border-radius: 1px;
   }
 
-  /* Keyboard users get the ring; pointer users never see it. */
   :focus:not(:focus-visible) {
     outline: none;
   }
@@ -196,6 +222,24 @@
     color: var(--color-accent);
     text-decoration-color: var(--color-accent);
   }
+}
+
+/* The name. Serif, set large and tight — the one place the page raises its voice. */
+@utility display {
+  font-family: var(--font-serif);
+  font-size: clamp(2.9rem, 9.5vw, 5.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.028em;
+  font-weight: 400;
+}
+
+/* Small caps-ish mono label used for section marks and data. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
 /*
