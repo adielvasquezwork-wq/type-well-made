@@ -2,12 +2,24 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 /*
  * Design system: text-first, near-monochrome personal site.
  * Ink on warm off-white, a single restrained accent (dry clay red).
+ *
+ * Colour is expressed with light-dark(), so the palette follows the reader's
+ * system preference on its own. `.light` / `.dark` on <html> force a scheme.
  */
+
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light *)) {
+      @slot;
+    }
+  }
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -52,50 +64,47 @@
 }
 
 :root {
+  color-scheme: light dark;
+
   --radius: 0.25rem;
-  --background: oklch(0.972 0.004 91);
-  --foreground: oklch(0.205 0.006 65);
-  --card: oklch(0.985 0.003 91);
+  --background: light-dark(oklch(0.972 0.004 91), oklch(0.18 0.004 75));
+  --foreground: light-dark(oklch(0.205 0.006 65), oklch(0.93 0.004 91));
+  --card: light-dark(oklch(0.985 0.003 91), oklch(0.21 0.004 75));
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.205 0.006 65);
-  --primary-foreground: oklch(0.985 0.003 91);
-  --secondary: oklch(0.94 0.004 91);
+  --primary: light-dark(oklch(0.205 0.006 65), oklch(0.93 0.004 91));
+  --primary-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
+  --secondary: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.94 0.004 91);
-  --muted-foreground: oklch(0.58 0.007 75);
-  --accent: oklch(0.55 0.13 38);
-  --accent-foreground: oklch(0.985 0.003 91);
-  --destructive: oklch(0.55 0.19 27);
-  --destructive-foreground: oklch(0.985 0.003 91);
-  --border: oklch(0.87 0.005 85);
-  --hairline: oklch(0.9 0.005 85);
-  --input: oklch(0.87 0.005 85);
-  --ring: oklch(0.58 0.007 75);
+  --muted: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
+  --muted-foreground: light-dark(oklch(0.58 0.007 75), oklch(0.65 0.006 80));
+  --accent: light-dark(oklch(0.55 0.13 38), oklch(0.68 0.13 40));
+  --accent-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
+  --destructive: light-dark(oklch(0.55 0.19 27), oklch(0.65 0.18 27));
+  --destructive-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
+  --border: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 12%));
+  --hairline: light-dark(oklch(0.9 0.005 85), oklch(1 0 0 / 9%));
+  --input: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 15%));
+  --ring: light-dark(oklch(0.58 0.007 75), oklch(0.65 0.006 80));
+
+  /* Paper tooth. Reads heavier on ink, so dark gets a touch more. */
+  --grain-opacity: 0.05;
+}
+
+.light {
+  color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.18 0.004 75);
-  --foreground: oklch(0.93 0.004 91);
-  --card: oklch(0.21 0.004 75);
-  --card-foreground: var(--foreground);
-  --popover: var(--card);
-  --popover-foreground: var(--foreground);
-  --primary: oklch(0.93 0.004 91);
-  --primary-foreground: oklch(0.18 0.004 75);
-  --secondary: oklch(0.25 0.004 75);
-  --secondary-foreground: var(--foreground);
-  --muted: oklch(0.25 0.004 75);
-  --muted-foreground: oklch(0.65 0.006 80);
-  --accent: oklch(0.68 0.13 40);
-  --accent-foreground: oklch(0.18 0.004 75);
-  --destructive: oklch(0.65 0.18 27);
-  --destructive-foreground: oklch(0.18 0.004 75);
-  --border: oklch(1 0 0 / 12%);
-  --hairline: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.006 80);
+  color-scheme: dark;
+  --grain-opacity: 0.075;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --grain-opacity: 0.075;
+  }
 }
 
 @layer base {
@@ -106,17 +115,69 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Punctuation hangs into the margin so the text block optically aligns. */
+    hanging-punctuation: first last;
   }
 
   body {
+    position: relative;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01";
+    font-feature-settings: "ss01", "calt";
+    caret-color: var(--color-accent);
+  }
+
+  /*
+   * A single sheet of grain over everything. Fixed so it behaves like paper
+   * the page is printed on rather than something that scrolls with it.
+   */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Prose sets its own rag; headings should never leave a word stranded. */
+  p {
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 
   ::selection {
     background-color: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 1px;
+  }
+
+  /* Keyboard users get the ring; pointer users never see it. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -135,4 +196,13 @@
     color: var(--color-accent);
     text-decoration-color: var(--color-accent);
   }
+}
+
+/*
+ * Entrance. Each block sets --i and inherits the same curve, so the page
+ * assembles top-to-bottom instead of arriving all at once.
+ */
+@utility rise-in {
+  animation: rise 0.85s var(--ease-quiet) both;
+  animation-delay: calc(var(--i, 0) * 65ms);
 }
