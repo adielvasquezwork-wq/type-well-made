@@ -7,30 +7,44 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+/** Sets the entrance delay slot for a block, same as the index route. */
+const at = (i: number) => ({ "--i": i }) as CSSProperties;
+
+/** Shared shell for the two dead ends, so they read like the rest of the site. */
+function Message({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-[34rem] flex-col justify-center px-6 pb-24 text-[0.95rem] leading-[1.8] tracking-[-0.006em] sm:px-8">
+      <p
+        className="rise-in font-mono text-[0.62rem] uppercase tracking-[0.22em] text-muted-foreground/70"
+        style={at(0)}
+      >
+        {label}
+      </p>
+      {children}
+    </main>
+  );
+}
+
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
+    <Message label="404">
+      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+        This page doesn’t exist.
+      </h1>
+      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+        It may have moved, or the link that brought you here was already wrong.
+      </p>
+      <p className="rise-in mt-8" style={at(3)}>
+        <Link className="link" to="/">
+          Back to the index
+        </Link>
+      </p>
+    </Message>
   );
 }
 
@@ -42,33 +56,31 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
-      </div>
-    </div>
+    <Message label="Error">
+      <h1 className="rise-in mt-5 font-medium tracking-[-0.015em]" style={at(1)}>
+        This page didn’t load.
+      </h1>
+      <p className="rise-in mt-3 text-foreground/70" style={at(2)}>
+        Something broke on the way here. Trying again usually settles it.
+      </p>
+      <p className="rise-in mt-8" style={at(3)}>
+        <button
+          type="button"
+          className="link"
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+        >
+          Try again
+        </button>
+        {", or "}
+        <a className="link" href="/">
+          back to the index
+        </a>
+        .
+      </p>
+    </Message>
   );
 }
 
@@ -78,22 +90,48 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Adiel Vásquez — Independent Brand & Web Designer" },
-      { name: "description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
+      {
+        name: "description",
+        content:
+          "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
+      },
       { name: "author", content: "Adiel Vásquez" },
+      // Paints the mobile browser chrome the same paper/ink as the page.
+      { name: "theme-color", content: "#f7f6f3", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#131110", media: "(prefers-color-scheme: dark)" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
       { name: "twitter:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
-      { property: "og:description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
-      { name: "twitter:description", content: "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png" },
+      {
+        property: "og:description",
+        content:
+          "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      // SVG mark first (it carries its own dark-mode rule); .ico is the fallback.
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "alternate icon", href: "/favicon.ico", sizes: "any" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
