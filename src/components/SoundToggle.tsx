@@ -31,27 +31,27 @@ export function SoundToggle() {
 
     const filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = 520;
-    filter.Q.value = 0.4;
+    filter.frequency.value = 480;
+    filter.Q.value = 0.3;
     filter.connect(master);
 
-    // Two detuned low sines + a slow tremolo: a soft room tone, not a melody.
-    const oscs = [55, 82.41, 110].map((freq, i) => {
+    // Two detuned low sines: a warm, muted phone-like tone.
+    const oscs = [60, 85].map((freq, i) => {
       const osc = ctx.createOscillator();
       osc.type = "sine";
       osc.frequency.value = freq;
-      osc.detune.value = i * 4 - 4;
+      osc.detune.value = i * 3 - 1.5;
       const g = ctx.createGain();
-      g.gain.value = i === 2 ? 0.06 : 0.14;
+      g.gain.value = i === 0 ? 0.08 : 0.05;
       osc.connect(g).connect(filter);
       osc.start();
       return { osc, g };
     });
 
     const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.07;
+    lfo.frequency.value = 0.05;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 120;
+    lfoGain.gain.value = 60;
     lfo.connect(lfoGain).connect(filter.frequency);
     lfo.start();
 
@@ -83,21 +83,21 @@ export function SoundToggle() {
     }
   };
 
-  // Considered interaction sound: a single short, filtered tick on link hover.
+  // Considered interaction sound: a single short, muted beep on link hover.
   useEffect(() => {
     if (!on) return;
     const tick = () => {
       const { ctx, master } = ensureCtx();
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.value = 1180;
+      osc.type = "sine";
+      osc.frequency.value = 720;
       g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.006);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+      g.gain.exponentialRampToValueAtTime(0.04, ctx.currentTime + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
       osc.connect(g).connect(master.context.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.1);
+      osc.stop(ctx.currentTime + 0.15);
     };
     const handler = (e: Event) => {
       const el = e.target as HTMLElement | null;
