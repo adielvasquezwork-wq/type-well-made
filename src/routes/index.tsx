@@ -59,11 +59,14 @@ const work: Work[] = [
     href: "https://adiel.design/grain",
     meta: "Brand, web, naming",
     year: "2025",
+    // Frames pulled from the project's own brand reel — the palette card,
+    // the pattern generator, a live session, and the mark — rather than
+    // screenshots of the marketing site.
     images: [
-      "https://framerusercontent.com/images/J2PSMJySRj7f9blUMS07kQDFjqI.jpg",
-      "https://framerusercontent.com/images/wov9yO3vAmRtEKGfT6dVTiMRpOA.webp",
-      "https://framerusercontent.com/images/7vMHzbwfdBYPssC2SxFvwgjubs.jpg",
-      "https://framerusercontent.com/images/UOFIzUSB7STkmg8X72TtuhWtdfM.jpg",
+      "/work/grain/grain-1-palette.jpg",
+      "/work/grain/grain-2-pattern.jpg",
+      "/work/grain/grain-3-session.jpg",
+      "/work/grain/grain-4-mark.jpg",
     ],
   },
   { title: "Cipher", meta: "Brand, web", year: "2025" },
