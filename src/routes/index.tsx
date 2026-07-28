@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { LocalTime } from "@/components/LocalTime";
 import { SoundToggle } from "@/components/SoundToggle";
@@ -30,14 +30,12 @@ type Work = {
   meta: string;
   year: string;
   /**
-   * Cover shown in the preview panel. Drop a file in `public/work/` and point
-   * at it — `image: "/work/serveo.jpg"`. Anything without one falls back to a
-   * typeset panel rather than a stand-in graphic, so the list never implies
-   * work that isn't there yet.
+   * Real screenshots from the case study, shown as a slider in the floating
+   * preview. Left empty for anything without a live case study to pull
+   * from — the preview simply never appears for that row, rather than
+   * standing in a graphic for work that isn't published.
    */
-  image?: string;
-  /** Line under the preview. Defaults to the disciplines. */
-  credit?: string;
+  images?: string[];
 };
 
 const work: Work[] = [
@@ -49,10 +47,36 @@ const work: Work[] = [
     href: "https://adiel.design/serveo",
     meta: "Brand, web, naming",
     year: "2025",
+    images: [
+      "https://framerusercontent.com/images/l7zfXudj0Gcle7M4WBCLsDU5Y.jpg",
+      "https://framerusercontent.com/images/t48AH01F2ws45pm1R7STMBW0mgM.jpg",
+      "https://framerusercontent.com/images/8u7RRRYRgcTox1dPSEespWV2FoI.jpg",
+      "https://framerusercontent.com/images/kYAYwybdRgLVzl2msMuMCcMJFeQ.jpg",
+    ],
   },
-  { title: "Grain", href: "https://adiel.design/grain", meta: "Brand, web, naming", year: "2025" },
+  {
+    title: "Grain",
+    href: "https://adiel.design/grain",
+    meta: "Brand, web, naming",
+    year: "2025",
+    // Frames pulled from the project's own brand reel — the palette card,
+    // the pattern generator, a live session, and the mark — rather than
+    // screenshots of the marketing site.
+    images: [
+      "/work/grain/grain-1-palette.jpg",
+      "/work/grain/grain-2-pattern.jpg",
+      "/work/grain/grain-3-session.jpg",
+      "/work/grain/grain-4-mark.jpg",
+    ],
+  },
   { title: "Cipher", meta: "Brand, web", year: "2025" },
 ];
+
+/** Groups the flat list by year, newest first, preserving in-year order. */
+function byYear(rows: Work[]) {
+  const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b.localeCompare(a));
+  return years.map((year) => ({ year, rows: rows.filter((r) => r.year === year) }));
+}
 
 /** Sets the entrance delay slot for a block. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -102,229 +126,138 @@ function Label({ children }: { children: string }) {
   );
 }
 
-/** Title over year, so the chip behind a row hugs the text instead of a column. */
-const rowBase = "flex flex-col gap-0.5 px-3 py-2";
+/**
+ * A work row. Bleeds 0.75rem into the gutter on both sides so the hover block
+ * reads as a band across the column rather than a box drawn around the text.
+ *
+ * Tailwind v4 already gates `hover:` behind @media (hover:hover), so touch
+ * devices never latch the highlight on tap — no extra variant needed.
+ */
+const rowBase =
+  "-mx-3 flex items-center justify-between gap-6 rounded-lg px-3 py-2.5 transition-colors duration-150 ease-strong";
 
-function RowBody({ row }: { row: Work }) {
+function Row({ row, onEnter, onLeave }: { row: Work; onEnter: () => void; onLeave: () => void }) {
+  const meta = (
+    <span className="shrink-0 text-muted-foreground transition-colors duration-150 ease-strong group-hover:text-foreground">
+      {row.meta}
+    </span>
+  );
+
+  if (!row.href) {
+    // Unreleased work: same weight as the rest of the list, since the missing
+    // arrow is what says "not clickable" — dimming it too would read as noise.
+    return (
+      <div className={`${rowBase} text-muted-foreground`}>
+        <span>{row.title}</span>
+        <span className="shrink-0">{row.meta}</span>
+      </div>
+    );
+  }
+
   return (
-    <>
+    <a
+      href={row.href}
+      target="_blank"
+      rel="noreferrer"
+      onPointerEnter={onEnter}
+      onFocus={onEnter}
+      onPointerLeave={onLeave}
+      onBlur={onLeave}
+      className={`group ${rowBase} text-muted-foreground hover:bg-foreground/[0.045] hover:text-foreground`}
+    >
       <span className="flex items-center gap-1">
-        <span
-          className={
-            row.href
-              ? "underline decoration-border decoration-2 underline-offset-2 transition-colors duration-150 ease-strong group-hover:decoration-accent"
-              : undefined
-          }
-        >
-          {row.title}
-        </span>
-        {row.href ? <ArrowOut /> : null}
+        <span>{row.title}</span>
+        <ArrowOut />
       </span>
-      <span className="text-muted-foreground">
-        {row.year}
-        {/* No preview panel on small screens, so the disciplines ride along here. */}
-        <span className="lg:hidden"> · {row.meta}</span>
-      </span>
-    </>
+      {meta}
+    </a>
   );
 }
 
 /**
- * Cover for a project with no image yet: a typeset title card, not a stand-in
- * screenshot. The panel is artwork rather than running text, which is the one
- * place a display size is allowed — the page's type scale is still flat.
+ * Floating preview: a slider of real case-study screenshots. It carries no
+ * background, border, or shadow of its own — just the images — so there's
+ * nothing sitting on the page until a project with real shots is hovered.
  *
- * The wash origin cycles so six of these in a row don't read as one repeated
- * card.
+ * It's positioned relative to the work section rather than the grid, so the
+ * single reading column never changes width to make room for it; on anything
+ * narrower than a very large desktop there's no space to show it and it
+ * doesn't render at all.
  */
-const washes = ["120% 90% at 18% 8%", "115% 95% at 82% 12%", "130% 95% at 50% 0%"];
+function PreviewSlider({ images, alt }: { images: string[]; alt: string }) {
+  const [index, setIndex] = useState(0);
 
-function PreviewFallback({ row, i }: { row: Work; i: number }) {
-  return (
-    <div className="relative flex size-full flex-col justify-between p-7">
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `radial-gradient(${washes[i % washes.length]}, color-mix(in oklab, var(--color-accent) 17%, transparent), transparent 70%)`,
-        }}
-      />
-      <p className="relative self-end font-mono text-[0.72rem] tabular-nums text-muted-foreground">
-        {row.year}
-      </p>
-      <div className="relative">
-        <p className="text-[1.75rem] leading-[1.1] tracking-[-0.022em] text-foreground">
-          {row.title}
-        </p>
-        <p className="mt-1.5 text-muted-foreground">{row.meta}</p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * The work list and its preview. One shared chip slides and resizes between
- * rows rather than each row carrying its own hover background — the travel is
- * what makes the list feel like a single object being read down.
- *
- * Hover and keyboard focus both drive it, so tabbing through the links moves
- * the preview too. The panel itself is a large-screen affordance; on touch the
- * list stands on its own and carries the disciplines inline.
- */
-function WorkShowcase({ rows, baseSlot }: { rows: Work[]; baseSlot: number }) {
-  const listRef = useRef<HTMLUListElement>(null);
-  const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
-  const [active, setActive] = useState(0);
-  const [chip, setChip] = useState({ x: 0, y: 0, w: 0, h: 0 });
-  const [lit, setLit] = useState(false);
-  // Until the chip has been placed once, moving it would mean sliding in from
-  // the list's top-left corner.
-  const [placed, setPlaced] = useState(false);
-
-  const measure = useCallback((i: number) => {
-    const el = itemsRef.current[i];
-    if (!el) return;
-    setChip({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
-  }, []);
-
-  useLayoutEffect(() => {
-    measure(0);
-    const id = requestAnimationFrame(() => setPlaced(true));
-    return () => cancelAnimationFrame(id);
-  }, [measure]);
-
-  // Rows reflow when the webfont swaps in or the window resizes; the chip has
-  // to follow or it ends up sitting beside the text it belongs to.
   useEffect(() => {
-    const list = listRef.current;
-    if (!list || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => measure(active));
-    ro.observe(list);
-    return () => ro.disconnect();
-  }, [active, measure]);
-
-  const enter = (i: number) => {
-    setActive(i);
-    measure(i);
-    setLit(true);
-  };
-
-  const current = rows[active];
-  // The fallback card already names the disciplines, so repeating them under it
-  // would just be the same words twice. A real cover gets the caption instead.
-  const caption = current.credit ?? (current.image ? current.meta : null);
+    setIndex(0);
+    if (images.length < 2) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % images.length), 2400);
+    return () => window.clearInterval(id);
+  }, [images]);
 
   return (
-    // Auto first column: the list is only as wide as its longest title, so the
-    // gap to the panel stays constant instead of being padded out by an
-    // arbitrary column width.
-    <div className="mt-5 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-16">
-      <ul
-        ref={listRef}
-        className="relative -mx-3"
-        onPointerLeave={() => setLit(false)}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setLit(false);
-        }}
-      >
-        <span
-          aria-hidden
-          className={`chip pointer-events-none absolute left-0 top-0 -z-10 rounded-xl ${
-            placed ? "transition-all duration-[280ms] ease-strong" : ""
-          }`}
-          style={{
-            transform: `translate3d(${chip.x}px, ${chip.y}px, 0)`,
-            width: chip.w,
-            height: chip.h,
-            opacity: lit ? 1 : 0,
-          }}
-        />
-        {rows.map((row, i) => (
-          <li
-            key={row.title}
-            ref={(el) => {
-              itemsRef.current[i] = el;
-            }}
-            className="rise-in w-fit"
-            style={at(baseSlot + i)}
-            onPointerEnter={() => enter(i)}
-            onFocus={() => enter(i)}
-          >
-            {row.href ? (
-              <a
-                href={row.href}
-                target="_blank"
-                rel="noreferrer"
-                className={`group ${rowBase} text-foreground`}
-              >
-                <RowBody row={row} />
-              </a>
-            ) : (
-              // Unreleased work: same size as the rest of the list, since the
-              // missing arrow is what says "not clickable" — dimming it too
-              // would read as noise.
-              <div className={`${rowBase} text-muted-foreground`}>
-                <RowBody row={row} />
-              </div>
-            )}
-          </li>
+    <div className="w-[21rem]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl">
+        {images.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={i === index ? alt : ""}
+            loading="lazy"
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ease-strong ${
+              i === index ? "opacity-100" : "opacity-0"
+            }`}
+          />
         ))}
-      </ul>
-
-      {/* No top margin: the panel's top edge lines up with the first row. */}
-      <div className="rise-in hidden lg:block" style={at(baseSlot + rows.length)}>
-        <div className="sticky top-24">
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-hairline bg-card">
-            {rows.map((row, i) => (
-              <div
-                key={row.title}
-                aria-hidden={i !== active}
-                className={`absolute inset-0 transition-opacity duration-300 ease-strong ${
-                  i === active ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {row.image ? (
-                  <img
-                    src={row.image}
-                    alt={`${row.title} — ${row.meta}`}
-                    loading="lazy"
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <PreviewFallback row={row} i={i} />
-                )}
-              </div>
-            ))}
-          </div>
-          {/* Height is reserved so swapping to a project with a credit line
-              doesn't nudge everything below it. */}
-          <p className="mt-3 min-h-[1.55em] text-muted-foreground">{caption}</p>
-        </div>
       </div>
+      {images.length > 1 ? (
+        <div className="mt-3 flex justify-center gap-1.5">
+          {images.map((src, i) => (
+            <span
+              key={src}
+              aria-hidden
+              className={`h-[3px] w-4 rounded-full transition-colors duration-300 ease-strong ${
+                i === index ? "bg-foreground" : "bg-foreground/15"
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 function Home() {
-  // Entrance slots, handed out top to bottom as the page is composed: header
-  // and bio take 0 and 1, then the work label, its rows, and its preview.
-  const workSlot = 2;
-  const listSlot = workSlot + 1;
-  const afterWork = listSlot + work.length + 1;
+  const groups = byYear(work);
+
+  // Entrance slots are handed out top to bottom as the page is composed.
+  let slot = 2;
+  const next = () => slot++;
+
+  const [preview, setPreview] = useState<Work | null>(null);
+  // Keeps the last project on screen while the panel fades out, so it
+  // doesn't go blank mid-transition.
+  const [shown, setShown] = useState<Work | null>(null);
+  const hideTimer = useRef<number | undefined>(undefined);
+
+  const showPreview = (row: Work) => {
+    if (!row.images?.length) return;
+    window.clearTimeout(hideTimer.current);
+    setShown(row);
+    setPreview(row);
+  };
+  const hidePreview = () => {
+    setPreview(null);
+    hideTimer.current = window.setTimeout(() => setShown(null), 350);
+  };
 
   return (
-    /*
-     * The reading column stays at 34rem everywhere. On large screens the page
-     * itself widens so the work preview has somewhere to sit — the text blocks
-     * keep their measure and the composition just gains a right-hand panel.
-     */
-    <main className="mx-auto min-h-screen w-full max-w-[34rem] px-6 pb-28 pt-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-8 sm:pt-36 lg:max-w-[54rem] lg:px-10">
+    <main className="relative mx-auto min-h-screen w-full max-w-[34rem] px-6 pb-28 pt-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-8 sm:pt-36">
       <header className="rise-in flex flex-col gap-0.5" style={at(0)}>
         <h1>Adiel Vásquez</h1>
         <p className="text-muted-foreground">Independent brand &amp; web designer</p>
       </header>
 
-      <div className="rise-in mt-10 max-w-[34rem] space-y-4 text-prose" style={at(1)}>
+      <div className="rise-in mt-10 space-y-4 text-prose" style={at(1)}>
         <p>
           I work with startups and studios on identities and websites with real character —
           concept-first, execution-obsessed, allergic to generic.
@@ -356,13 +289,50 @@ function Home() {
       </div>
 
       <section className="mt-14">
-        <div className="rise-in" style={at(workSlot)}>
+        <div className="rise-in" style={at(next())}>
           <Label>Selected work</Label>
         </div>
-        <WorkShowcase rows={work} baseSlot={listSlot} />
+
+        <div className="mt-5 flex flex-col gap-7">
+          {groups.map((group) => (
+            <div key={group.year}>
+              <p
+                className="rise-in font-mono text-[0.72rem] tabular-nums text-muted-foreground/70"
+                style={at(next())}
+              >
+                {group.year}
+              </p>
+              <ul className="mt-1.5">
+                {group.rows.map((row) => (
+                  <li key={row.title} className="rise-in" style={at(next())}>
+                    <Row row={row} onEnter={() => showPreview(row)} onLeave={hidePreview} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="rise-in mt-14 max-w-[34rem] text-prose" style={at(afterWork)}>
+      {/*
+       * Fixed to the viewport rather than laid into the column, so it never
+       * changes the page's width or depends on scroll position — it's an
+       * overlay that happens to have somewhere to sit only once the screen is
+       * wide enough (50vw + half the column + a gap clears the text). Below
+       * that it doesn't render at all rather than crowd the reading column.
+       */}
+      {shown?.images ? (
+        <div
+          aria-hidden
+          className={`pointer-events-none fixed top-1/2 left-[calc(50%+21rem)] hidden -translate-y-1/2 transition-all duration-300 ease-strong 2xl:block ${
+            preview ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-0"
+          }`}
+        >
+          <PreviewSlider images={shown.images} alt={`${shown.title} — ${shown.meta}`} />
+        </div>
+      ) : null}
+
+      <section className="rise-in mt-14 text-prose" style={at(next())}>
         <Label>Elsewhere</Label>
         <p className="mt-4">
           Site of the day on A1Gallery, featured on Landbook and the Framer Gallery. Older work and
@@ -375,8 +345,8 @@ function Home() {
       </section>
 
       <footer
-        className="rise-in mt-16 flex max-w-[34rem] flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-t border-hairline pt-6 text-muted-foreground"
-        style={at(afterWork + 1)}
+        className="rise-in mt-16 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-t border-hairline pt-6 text-muted-foreground"
+        style={at(next())}
       >
         <p>
           <a className="link" href="mailto:hello@adiel.design">
