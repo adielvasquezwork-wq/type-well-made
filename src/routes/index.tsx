@@ -113,8 +113,9 @@ function Row({ row }: { row: Work }) {
   if (!row.href) {
     // Unreleased work: same weight as the rest of the list, since the missing
     // arrow is what says "not clickable" — dimming it too would read as noise.
+    // No sound either — there's nothing to click, so nothing to confirm.
     return (
-      <div className={`${rowBase} text-muted-foreground`} data-sound-row>
+      <div className={`${rowBase} text-muted-foreground`}>
         <span>{row.title}</span>
         <span className="shrink-0">{row.meta}</span>
       </div>
@@ -126,7 +127,6 @@ function Row({ row }: { row: Work }) {
       href={row.href}
       target="_blank"
       rel="noreferrer"
-      data-sound-row
       className={`group ${rowBase} text-muted-foreground hover:bg-foreground/[0.045] hover:text-foreground`}
     >
       <span className="flex items-center gap-1">

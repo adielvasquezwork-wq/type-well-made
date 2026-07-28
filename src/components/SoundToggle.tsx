@@ -86,12 +86,17 @@ export function SoundToggle() {
     }
   };
 
-  // Considered interaction sound: a short, filtered tick on link hover.
+  // Considered interaction sound: a short, filtered tick on hover, a blockier
+  // knock on click. Both are scoped to `a[href]` and real buttons only — an
+  // unreleased work row or anything else with nothing behind it stays silent.
   // Pitch and gain drift slightly each time so a row of six doesn't sound
   // like a metronome, and a minimum gap keeps a fast sweep from turning
   // into a clatter.
   useEffect(() => {
     if (!on) return;
+    const isSoundable = (target: EventTarget | null) =>
+      (target as HTMLElement | null)?.closest("a[href], button:not([disabled])");
+
     const notes = [660, 740, 780, 830];
     let lastTick = 0;
     const tick = () => {
@@ -121,12 +126,48 @@ export function SoundToggle() {
       osc.start(t);
       osc.stop(t + 0.18);
     };
-    const handler = (e: Event) => {
-      const el = e.target as HTMLElement | null;
-      if (el?.closest("a, [data-sound-row]")) tick();
+
+    // A squarer, lower knock for the actual commit of a click — a wooden
+    // block rather than the hover tick's glassy chime. Pitch falls fast
+    // over the first 40ms, which is what gives it the blocky, struck feel.
+    const click = () => {
+      const { ctx, master } = ensureCtx();
+      const t = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const g = ctx.createGain();
+
+      osc.type = "square";
+      const base = 250 + (Math.random() * 20 - 10);
+      osc.frequency.setValueAtTime(base, t);
+      osc.frequency.exponentialRampToValueAtTime(base * 0.5, t + 0.045);
+
+      filter.type = "lowpass";
+      filter.frequency.value = 1400;
+      filter.Q.value = 0.6;
+
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.055, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+
+      osc.connect(filter).connect(g).connect(master.context.destination);
+      osc.start(t);
+      osc.stop(t + 0.07);
     };
-    document.addEventListener("pointerover", handler);
-    return () => document.removeEventListener("pointerover", handler);
+
+    const hoverHandler = (e: Event) => {
+      if (isSoundable(e.target)) tick();
+    };
+    const clickHandler = (e: Event) => {
+      if (isSoundable(e.target)) click();
+    };
+    document.addEventListener("pointerover", hoverHandler);
+    document.addEventListener("click", clickHandler);
+    return () => {
+      document.removeEventListener("pointerover", hoverHandler);
+      document.removeEventListener("click", clickHandler);
+    };
   }, [on, ensureCtx]);
 
   useEffect(() => () => stopRef.current?.(), []);
