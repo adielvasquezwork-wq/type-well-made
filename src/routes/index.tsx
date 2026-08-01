@@ -211,8 +211,8 @@ function PreviewSlider({ images, alt }: { images: string[]; alt: string }) {
 
   return (
     <figure className="w-[20rem]">
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[3px] border border-border bg-secondary/40 p-1 shadow-[0_1px_0_var(--color-hairline),0_12px_28px_-18px_oklch(0.24_0.007_63_/_0.35)]">
-        <div className="relative size-full overflow-hidden rounded-[2px]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[6px] border border-border bg-secondary/40 p-1 shadow-[0_1px_0_var(--color-hairline),0_12px_28px_-18px_oklch(0.24_0.007_63_/_0.35)]">
+        <div className="relative size-full overflow-hidden rounded-[2px] outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10">
           {images.map((src, i) => (
             <img
               key={src}
@@ -335,7 +335,7 @@ function Home() {
           {groups.map((group) => (
             <div key={group.year}>
               <p className="rise-in flex items-baseline gap-2.5" style={at(next())}>
-                <span className="label-tag text-accent/75">{group.year}</span>
+                <span className="label-tag text-accent">{group.year}</span>
                 <span aria-hidden className="h-px flex-1 translate-y-[-0.2em] bg-hairline" />
               </p>
               <ul className="mt-1">
@@ -353,7 +353,7 @@ function Home() {
       {shown?.images ? (
         <div
           aria-hidden
-          className={`pointer-events-none fixed top-1/2 left-[calc(50%+21rem)] hidden -translate-y-1/2 transition-all duration-300 ease-strong 2xl:block ${
+          className={`pointer-events-none fixed top-1/2 left-[calc(50%+21rem)] hidden -translate-y-1/2 transition-[transform,opacity] duration-300 ease-strong 2xl:block ${
             preview ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-0"
           }`}
         >
