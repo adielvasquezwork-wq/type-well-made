@@ -72,10 +72,15 @@ const work: Work[] = [
   { title: "Cipher", meta: "Brand, web", year: "2025" },
 ];
 
-/** Groups the flat list by year, newest first, preserving in-year order. */
+/**
+ * Groups the flat list by year, newest first, and hands every row a running
+ * catalog number across the whole list — the numbers belong to the archive,
+ * not to the year, so they never restart.
+ */
 function byYear(rows: Work[]) {
-  const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b.localeCompare(a));
-  return years.map((year) => ({ year, rows: rows.filter((r) => r.year === year) }));
+  const numbered = rows.map((row, i) => ({ ...row, no: String(i + 1).padStart(2, "0") }));
+  const years = [...new Set(numbered.map((r) => r.year))].sort((a, b) => b.localeCompare(a));
+  return years.map((year) => ({ year, rows: numbered.filter((r) => r.year === year) }));
 }
 
 /** Sets the entrance delay slot for a block. */
@@ -83,7 +88,8 @@ const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
 /**
  * The only place colour appears. It marks a state — currently open for work —
- * the way a status light does, which is why nothing else on the page is clay.
+ * the way a grease-pencil tick on a folder does, which is why nothing else on
+ * the sheet is clay.
  */
 function StatusDot() {
   return (
@@ -105,7 +111,7 @@ function ArrowOut() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
-      className="size-4 shrink-0 opacity-50 transition-opacity duration-150 ease-strong group-hover:opacity-100"
+      className="size-[13px] shrink-0 -translate-y-px opacity-45 transition-opacity duration-150 ease-strong group-hover:opacity-100"
     >
       <path d="M5 11 11 5" />
       <path d="M5.5 5H11v5.5" />
@@ -114,44 +120,59 @@ function ArrowOut() {
 }
 
 /**
- * Section label. Body size and sentence case — the hairline tick under it does
- * the separating, so the type never has to shout to mark a boundary.
+ * Section heading, set as a typed catalog label rather than a bigger line of
+ * type. The rule finishes it and carries one short clay tick at the far end —
+ * the same mark used on the folder tab, so the sheet reads as one system.
  */
 function Label({ children }: { children: string }) {
   return (
-    <>
-      <h2 className="text-foreground">{children}</h2>
-      <span aria-hidden className="mt-2.5 block h-px w-8 bg-border" />
-    </>
+    <div className="flex items-center gap-3">
+      <h2 className="label-tag text-muted-foreground">{children}</h2>
+      <span aria-hidden className="h-px flex-1 bg-hairline" />
+      <span aria-hidden className="h-px w-2.5 bg-accent/60" />
+    </div>
   );
 }
 
 /**
- * A work row. Bleeds 0.75rem into the gutter on both sides so the hover block
- * reads as a band across the column rather than a box drawn around the text.
+ * An index row, set like a line in a catalog: running number, title, dotted
+ * leader, discipline. The leader is what aligns the two ends, so no column
+ * widths have to be guessed. Bleeds into the gutter so the hover wash reads
+ * as ink soaking the line, not a box drawn around it.
  *
  * Tailwind v4 already gates `hover:` behind @media (hover:hover), so touch
- * devices never latch the highlight on tap — no extra variant needed.
+ * devices never latch the highlight on tap.
  */
 const rowBase =
-  "-mx-3 flex items-center justify-between gap-6 rounded-lg px-3 py-2.5 transition-colors duration-150 ease-strong";
+  "-mx-2.5 flex items-baseline gap-2.5 rounded-[3px] px-2.5 py-[0.55rem] transition-colors duration-150 ease-strong";
 
-function Row({ row, onEnter, onLeave }: { row: Work; onEnter: () => void; onLeave: () => void }) {
-  const meta = (
-    <span className="shrink-0 text-muted-foreground transition-colors duration-150 ease-strong group-hover:text-foreground">
-      {row.meta}
-    </span>
+function Row({
+  row,
+  onEnter,
+  onLeave,
+}: {
+  row: Work & { no: string };
+  onEnter: () => void;
+  onLeave: () => void;
+}) {
+  const body = (
+    <>
+      <span className="idx w-[1.35rem] shrink-0 tabular-nums group-hover:text-accent">{row.no}</span>
+      <span className="flex items-baseline gap-1.5">
+        <span>{row.title}</span>
+        {row.href ? <ArrowOut /> : null}
+      </span>
+      <span aria-hidden className="leader group-hover:border-muted-foreground/60" />
+      <span className="label-tag shrink-0 text-muted-foreground transition-colors duration-150 ease-strong group-hover:text-foreground">
+        {row.meta}
+      </span>
+    </>
   );
 
   if (!row.href) {
-    // Unreleased work: same weight as the rest of the list, since the missing
-    // arrow is what says "not clickable" — dimming it too would read as noise.
-    return (
-      <div className={`${rowBase} text-muted-foreground`}>
-        <span>{row.title}</span>
-        <span className="shrink-0">{row.meta}</span>
-      </div>
-    );
+    // Unreleased work: same weight as the rest of the index, since the missing
+    // arrow is what says "not filed yet" — dimming it would read as noise.
+    return <div className={`group ${rowBase} text-muted-foreground`}>{body}</div>;
   }
 
   return (
@@ -163,26 +184,20 @@ function Row({ row, onEnter, onLeave }: { row: Work; onEnter: () => void; onLeav
       onFocus={onEnter}
       onPointerLeave={onLeave}
       onBlur={onLeave}
-      className={`group ${rowBase} text-muted-foreground hover:bg-foreground/[0.045] hover:text-foreground`}
+      className={`group ${rowBase} text-prose hover:bg-secondary/55 hover:text-foreground`}
     >
-      <span className="flex items-center gap-1">
-        <span>{row.title}</span>
-        <ArrowOut />
-      </span>
-      {meta}
+      {body}
     </a>
   );
 }
 
 /**
- * Floating preview: a slider of real case-study screenshots. It carries no
- * background, border, or shadow of its own — just the images — so there's
- * nothing sitting on the page until a project with real shots is hovered.
+ * Floating preview: a slider of real case-study screenshots, mounted like a
+ * print clipped to the sheet — a hairline edge and a faint drop, nothing more.
  *
- * It's positioned relative to the work section rather than the grid, so the
- * single reading column never changes width to make room for it; on anything
- * narrower than a very large desktop there's no space to show it and it
- * doesn't render at all.
+ * It's fixed to the viewport rather than laid into the column, so the single
+ * reading measure never changes width to make room for it; below a very wide
+ * desktop it doesn't render at all.
  */
 function PreviewSlider({ images, alt }: { images: string[]; alt: string }) {
   const [index, setIndex] = useState(0);
@@ -195,34 +210,38 @@ function PreviewSlider({ images, alt }: { images: string[]; alt: string }) {
   }, [images]);
 
   return (
-    <div className="w-[21rem]">
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl">
-        {images.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={i === index ? alt : ""}
-            loading="lazy"
-            className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ease-strong ${
-              i === index ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
-      </div>
-      {images.length > 1 ? (
-        <div className="mt-3 flex justify-center gap-1.5">
+    <figure className="w-[20rem]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[3px] border border-border bg-secondary/40 p-1 shadow-[0_1px_0_var(--color-hairline),0_12px_28px_-18px_oklch(0.24_0.007_63_/_0.35)]">
+        <div className="relative size-full overflow-hidden rounded-[2px]">
           {images.map((src, i) => (
-            <span
+            <img
               key={src}
-              aria-hidden
-              className={`h-[3px] w-4 rounded-full transition-colors duration-300 ease-strong ${
-                i === index ? "bg-foreground" : "bg-foreground/15"
+              src={src}
+              alt={i === index ? alt : ""}
+              loading="lazy"
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ease-strong ${
+                i === index ? "opacity-100" : "opacity-0"
               }`}
             />
           ))}
         </div>
-      ) : null}
-    </div>
+      </div>
+      <figcaption className="label-tag mt-2.5 flex items-center gap-2 text-muted-foreground">
+        <span>{alt}</span>
+        {images.length > 1 ? (
+          <span aria-hidden className="ml-auto flex items-center gap-1">
+            {images.map((src, i) => (
+              <span
+                key={src}
+                className={`h-px w-3 transition-colors duration-300 ease-strong ${
+                  i === index ? "bg-accent" : "bg-border"
+                }`}
+              />
+            ))}
+          </span>
+        ) : null}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -251,13 +270,26 @@ function Home() {
   };
 
   return (
-    <main className="relative mx-auto min-h-screen w-full max-w-[34rem] px-6 pb-28 pt-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-8 sm:pt-36">
-      <header className="rise-in flex flex-col gap-0.5" style={at(0)}>
+    <main className="relative mx-auto min-h-screen w-full max-w-[35rem] px-6 pt-14 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-10 sm:pt-20">
+      {/*
+       * The folder tab. Cut card stock on the top edge of the sheet, carrying
+       * the file reference the way a typed label does — it's the page's only
+       * ornament, and it's still just a label.
+       */}
+      <div className="rise-in flex items-stretch" style={at(0)}>
+        <span className="tab label-tag flex items-center gap-2 py-[0.42rem] pr-4 pl-3 text-muted-foreground">
+          <span aria-hidden className="inline-block h-1 w-1 rounded-full bg-accent" />
+          AV / 001
+        </span>
+      </div>
+      <div aria-hidden className="rise-in h-px w-full bg-border" style={at(0)} />
+
+      <header className="rise-in mt-12 flex flex-col gap-1.5" style={at(1)}>
         <h1>Adiel Vásquez</h1>
-        <p className="text-muted-foreground">Independent brand &amp; web designer</p>
+        <p className="label-tag text-muted-foreground">Independent brand &amp; web designer</p>
       </header>
 
-      <div className="rise-in mt-10 space-y-4 text-prose" style={at(1)}>
+      <div className="rise-in mt-9 space-y-4 text-prose" style={at(2)}>
         <p>
           I work with startups and studios on identities and websites with real character —
           concept-first, execution-obsessed, allergic to generic.
@@ -288,21 +320,25 @@ function Home() {
         </p>
       </div>
 
+      {/*
+       * The index. No boxes and no rules across the rows — the running numbers
+       * and the dotted leaders already carry the rhythm, and adding ruled stock
+       * on top of them only put lines through the type.
+       */}
       <section className="mt-14">
         <div className="rise-in" style={at(next())}>
           <Label>Selected work</Label>
         </div>
 
-        <div className="mt-5 flex flex-col gap-7">
+        <div className="mt-4 flex flex-col gap-6">
+
           {groups.map((group) => (
             <div key={group.year}>
-              <p
-                className="rise-in font-mono text-[0.72rem] tabular-nums text-muted-foreground/70"
-                style={at(next())}
-              >
-                {group.year}
+              <p className="rise-in flex items-baseline gap-2.5" style={at(next())}>
+                <span className="label-tag text-accent/75">{group.year}</span>
+                <span aria-hidden className="h-px flex-1 translate-y-[-0.2em] bg-hairline" />
               </p>
-              <ul className="mt-1.5">
+              <ul className="mt-1">
                 {group.rows.map((row) => (
                   <li key={row.title} className="rise-in" style={at(next())}>
                     <Row row={row} onEnter={() => showPreview(row)} onLeave={hidePreview} />
@@ -314,13 +350,6 @@ function Home() {
         </div>
       </section>
 
-      {/*
-       * Fixed to the viewport rather than laid into the column, so it never
-       * changes the page's width or depends on scroll position — it's an
-       * overlay that happens to have somewhere to sit only once the screen is
-       * wide enough (50vw + half the column + a gap clears the text). Below
-       * that it doesn't render at all rather than crowd the reading column.
-       */}
       {shown?.images ? (
         <div
           aria-hidden
@@ -344,30 +373,55 @@ function Home() {
         </p>
       </section>
 
+      {/*
+       * Colophon. Set entirely in the catalog label, because the foot of the
+       * sheet is filing information — not something to be read as prose.
+       */}
       <footer
-        className="rise-in mt-16 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-t border-hairline pt-6 text-muted-foreground"
+        className="rise-in mt-16 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-4 border-t border-hairline pt-5"
         style={at(next())}
       >
-        <p>
-          <a className="link" href="mailto:hello@adiel.design">
+        <p className="label-tag flex items-baseline gap-3 text-muted-foreground">
+          <a className="transition-colors duration-150 ease-strong hover:text-accent" href="mailto:hello@adiel.design">
             Email
           </a>
-          {", "}
-          <a className="link" href="https://x.com/adieldesign" target="_blank" rel="noreferrer">
+          <span aria-hidden className="text-border">
+            ·
+          </span>
+          <a
+            className="transition-colors duration-150 ease-strong hover:text-accent"
+            href="https://x.com/adieldesign"
+            target="_blank"
+            rel="noreferrer"
+          >
             Twitter
           </a>
-          {", "}
-          <a className="link" href="https://www.cosmos.so/adiell" target="_blank" rel="noreferrer">
+          <span aria-hidden className="text-border">
+            ·
+          </span>
+          <a
+            className="transition-colors duration-150 ease-strong hover:text-accent"
+            href="https://www.cosmos.so/adiell"
+            target="_blank"
+            rel="noreferrer"
+          >
             Cosmos
           </a>
-          {", "}
-          <a className="link" href="https://savee.com/theadielv_/" target="_blank" rel="noreferrer">
+          <span aria-hidden className="text-border">
+            ·
+          </span>
+          <a
+            className="transition-colors duration-150 ease-strong hover:text-accent"
+            href="https://savee.com/theadielv_/"
+            target="_blank"
+            rel="noreferrer"
+          >
             Savee
           </a>
         </p>
-        <div className="flex items-baseline gap-5">
+        <div className="label-tag flex items-baseline gap-5 text-muted-foreground">
           <SoundToggle />
-          <p className="font-mono text-[0.72rem] tabular-nums">
+          <p>
             <LocalTime /> MDT
           </p>
         </div>

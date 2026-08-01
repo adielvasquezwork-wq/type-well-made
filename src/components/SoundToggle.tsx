@@ -177,7 +177,7 @@ export function SoundToggle() {
       type="button"
       onClick={toggle}
       aria-pressed={on}
-      className="group inline-flex items-center gap-2 text-muted-foreground transition-colors duration-150 ease-strong hover:text-foreground"
+      className="group inline-flex items-center gap-2 uppercase text-muted-foreground transition-colors duration-150 ease-strong hover:text-accent"
     >
       <span
         aria-hidden

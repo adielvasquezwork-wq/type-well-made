@@ -74,37 +74,40 @@
   color-scheme: light dark;
 
   --radius: 0.25rem;
-  --background: light-dark(oklch(0.972 0.004 91), oklch(0.18 0.004 75));
-  --foreground: light-dark(oklch(0.205 0.006 65), oklch(0.93 0.004 91));
-  --card: light-dark(oklch(0.985 0.003 91), oklch(0.21 0.004 75));
+  /* Manila. Warm paper stock, not white — the sheet is the design. */
+  --background: light-dark(oklch(0.943 0.014 90), oklch(0.19 0.008 72));
+  --foreground: light-dark(oklch(0.243 0.007 63), oklch(0.925 0.01 88));
+  --card: light-dark(oklch(0.965 0.011 90), oklch(0.215 0.009 72));
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: light-dark(oklch(0.205 0.006 65), oklch(0.93 0.004 91));
-  --primary-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
-  --secondary: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
+  --primary: light-dark(oklch(0.243 0.007 63), oklch(0.925 0.01 88));
+  --primary-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
+  /* The folder-tab stock: one step darker than the sheet. */
+  --secondary: light-dark(oklch(0.878 0.028 88), oklch(0.26 0.012 72));
   --secondary-foreground: var(--foreground);
-  --muted: light-dark(oklch(0.94 0.004 91), oklch(0.25 0.004 75));
+  --muted: var(--secondary);
 
   /*
-   * Two tiers of grey, the way fennell.cv splits #555 from #999. --prose is
-   * running text: dark enough to read as body copy rather than as a caption.
-   * --muted-foreground is tertiary — list rows, labels, the footer.
+   * Two tiers of ink. --prose is running text: dark enough to read as body
+   * copy. --muted-foreground is tertiary — index rows, labels, the colophon.
    */
-  --prose: light-dark(oklch(0.44 0.008 70), oklch(0.755 0.006 82));
-  --muted-foreground: light-dark(oklch(0.585 0.007 75), oklch(0.66 0.006 80));
-  --accent: light-dark(oklch(0.55 0.12 295), oklch(0.68 0.12 295));
-  --accent-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
-  --destructive: light-dark(oklch(0.55 0.19 27), oklch(0.65 0.18 27));
-  --destructive-foreground: light-dark(oklch(0.985 0.003 91), oklch(0.18 0.004 75));
-  --border: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 12%));
-  --hairline: light-dark(oklch(0.9 0.005 85), oklch(1 0 0 / 9%));
-  --input: light-dark(oklch(0.87 0.005 85), oklch(1 0 0 / 15%));
-  --ring: light-dark(oklch(0.585 0.007 75), oklch(0.66 0.006 80));
+  --prose: light-dark(oklch(0.44 0.012 68), oklch(0.755 0.01 84));
+  --muted-foreground: light-dark(oklch(0.575 0.014 70), oklch(0.655 0.01 82));
+  /* Grease pencil. The only colour on the sheet. */
+  --accent: light-dark(oklch(0.556 0.132 39), oklch(0.68 0.13 41));
+  --accent-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
+  --destructive: light-dark(oklch(0.52 0.17 27), oklch(0.65 0.17 27));
+  --destructive-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
+  --border: light-dark(oklch(0.845 0.018 86), oklch(1 0 0 / 13%));
+  --hairline: light-dark(oklch(0.885 0.016 87), oklch(1 0 0 / 8%));
+  --input: light-dark(oklch(0.845 0.018 86), oklch(1 0 0 / 15%));
+  --ring: light-dark(oklch(0.575 0.014 70), oklch(0.655 0.01 82));
 
   /* Paper tooth. Reads heavier on ink, so dark gets a touch more. */
-  --grain-opacity: 0.045;
+  --grain-opacity: 0.05;
 }
+
 
 .light {
   color-scheme: light;
@@ -231,4 +234,57 @@
 @utility rise-in {
   animation: rise 0.55s var(--ease-strong) both;
   animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+/*
+ * ── Archival craft layer ───────────────────────────────────────────────
+ * Everything below is the handmade apparatus: catalog labels, cut tabs,
+ * leader dots, the perforated left margin. All structure, no decoration
+ * that the eye has to work around.
+ */
+
+/*
+ * A typed catalog label. Small, mono, letterspaced — the only place caps
+ * appear, and the reason section headings never need to be set large.
+ */
+@utility label-tag {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The folder tab. Sits on the top edge of the sheet, squared on the inside
+ * and clipped on the outside so it reads as cut card stock, not a chip.
+ */
+@utility tab {
+  background-color: var(--color-secondary);
+  border-top-left-radius: 3px;
+  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 100%, 0 100%);
+}
+
+/*
+ * Dotted leaders, the way a table of contents sets them: the dots are drawn
+ * by the gap, so the two ends of the row stay where the grid puts them.
+ */
+@utility leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  align-self: end;
+  height: 0.42em;
+  border-bottom: 1px dotted var(--color-border);
+  transition: border-color 150ms var(--ease-strong);
+}
+
+/* The index numeral column: tabular, tertiary, never wider than it needs. */
+@utility idx {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-muted-foreground);
+  transition: color 150ms var(--ease-strong);
 }

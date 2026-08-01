@@ -18,11 +18,8 @@ const at = (i: number) => ({ "--i": i }) as CSSProperties;
 /** Shared shell for the two dead ends, so they read like the rest of the site. */
 function Message({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[34rem] flex-col justify-center px-6 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-8">
-      <p
-        className="rise-in font-mono text-[0.72rem] tabular-nums text-muted-foreground/70"
-        style={at(0)}
-      >
+    <main className="mx-auto flex min-h-screen w-full max-w-[35rem] flex-col justify-center px-6 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-10">
+      <p className="rise-in label-tag text-muted-foreground" style={at(0)}>
         {label}
       </p>
       {children}
@@ -97,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Adiel Vásquez" },
       // Paints the mobile browser chrome the same paper/ink as the page.
-      { name: "theme-color", content: "#f7f6f3", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#131110", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f2ede2", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#1a1815", media: "(prefers-color-scheme: dark)" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
