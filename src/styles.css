@@ -93,9 +93,10 @@
    * copy. --muted-foreground is tertiary — index rows, labels, the colophon.
    */
   --prose: light-dark(oklch(0.44 0.012 68), oklch(0.755 0.01 84));
-  --muted-foreground: light-dark(oklch(0.575 0.014 70), oklch(0.655 0.01 82));
-  /* Grease pencil. The only colour on the sheet. */
-  --accent: light-dark(oklch(0.556 0.132 39), oklch(0.68 0.13 41));
+  /* L tuned to clear 4.5:1 against both the page and the tab stock. */
+  --muted-foreground: light-dark(oklch(0.48 0.014 70), oklch(0.655 0.01 82));
+  /* Grease pencil. The only colour on the sheet. L tuned to clear 4.5:1 as text. */
+  --accent: light-dark(oklch(0.53 0.132 39), oklch(0.68 0.13 41));
   --accent-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
   --destructive: light-dark(oklch(0.52 0.17 27), oklch(0.65 0.17 27));
   --destructive-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
