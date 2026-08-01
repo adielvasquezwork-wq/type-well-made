@@ -321,16 +321,17 @@ function Home() {
       </div>
 
       {/*
-       * The index. Ruled stock sits behind it and only it: the rules are here
-       * to hold six short lines on a shared rhythm, which is exactly where
-       * ruled paper earns its keep.
+       * The index. No boxes and no rules across the rows — the running numbers
+       * and the dotted leaders already carry the rhythm, and adding ruled stock
+       * on top of them only put lines through the type.
        */}
       <section className="mt-14">
         <div className="rise-in" style={at(next())}>
           <Label>Selected work</Label>
         </div>
 
-        <div className="ruled mt-4 flex flex-col gap-6">
+        <div className="mt-4 flex flex-col gap-6">
+
           {groups.map((group) => (
             <div key={group.year}>
               <p className="rise-in flex items-baseline gap-2" style={at(next())}>
