@@ -235,3 +235,72 @@
   animation: rise 0.55s var(--ease-strong) both;
   animation-delay: calc(var(--i, 0) * 55ms);
 }
+
+/*
+ * ── Archival craft layer ───────────────────────────────────────────────
+ * Everything below is the handmade apparatus: catalog labels, ruled stock,
+ * leader dots, the perforated left margin. All structure, no decoration
+ * that the eye has to work around.
+ */
+
+/*
+ * A typed catalog label. Small, mono, letterspaced — the only place caps
+ * appear, and the reason section headings never need to be set large.
+ */
+@utility label-tag {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The folder tab. Sits on the top edge of the sheet, squared on the inside
+ * and clipped on the outside so it reads as cut card stock, not a chip.
+ */
+@utility tab {
+  background-color: var(--color-secondary);
+  border-top-left-radius: 3px;
+  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 100%, 0 100%);
+}
+
+/*
+ * Ruled stock. A single hairline repeating on the baseline rhythm, faint
+ * enough to sit under text rather than through it. Fades out at the foot
+ * so the sheet doesn't look like it was cut off mid-rule.
+ */
+@utility ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(1.5rem - 1px),
+    var(--color-hairline) calc(1.5rem - 1px),
+    var(--color-hairline) 1.5rem
+  );
+  mask-image: linear-gradient(to bottom, transparent 0, black 6rem, black 82%, transparent 100%);
+}
+
+/*
+ * Dotted leaders, the way a table of contents sets them: the dots are drawn
+ * by the gap, so the two ends of the row stay where the grid puts them.
+ */
+@utility leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  align-self: end;
+  height: 0.42em;
+  border-bottom: 1px dotted var(--color-border);
+  transition: border-color 150ms var(--ease-strong);
+}
+
+/* The index numeral column: tabular, tertiary, never wider than it needs. */
+@utility idx {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-muted-foreground);
+  transition: color 150ms var(--ease-strong);
+}
