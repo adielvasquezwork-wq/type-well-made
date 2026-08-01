@@ -97,8 +97,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Adiel Vásquez" },
       // Paints the mobile browser chrome the same paper/ink as the page.
-      { name: "theme-color", content: "#f7f6f3", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#131110", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f2ede2", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#1a1815", media: "(prefers-color-scheme: dark)" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
