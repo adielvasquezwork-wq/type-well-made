@@ -270,7 +270,7 @@ function Home() {
   };
 
   return (
-    <main className="relative mx-auto min-h-screen w-full max-w-[35rem] px-6 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-10">
+    <main className="relative mx-auto min-h-screen w-full max-w-[35rem] px-6 pt-14 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-10 sm:pt-20">
       {/*
        * The folder tab. Cut card stock on the top edge of the sheet, carrying
        * the file reference the way a typed label does — it's the page's only
