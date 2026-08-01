@@ -12,15 +12,17 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-/** Sets the entrance delay slot for a block, same as the index route. */
+/** Sets the entrance delay slot for a masthead line, same as the index route. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
 /** Shared shell for the two dead ends, so they read like the rest of the site. */
 function Message({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[35rem] flex-col justify-center px-6 pb-24 text-[0.9rem] leading-[1.55] tracking-[-0.008em] sm:px-10">
-      <p className="rise-in label-tag text-muted-foreground" style={at(0)}>
-        {label}
+    <main className="mx-auto flex min-h-screen w-full max-w-[76rem] flex-col justify-center px-6 pb-24 sm:px-10 lg:px-14">
+      <p className="line-mask label text-muted-foreground">
+        <span className="line-in inline-block" style={at(0)}>
+          {label}
+        </span>
       </p>
       {children}
     </main>
@@ -30,13 +32,17 @@ function Message({ label, children }: { label: string; children: ReactNode }) {
 function NotFoundComponent() {
   return (
     <Message label="404">
-      <h1 className="rise-in mt-4" style={at(1)}>
-        This page doesn’t exist.
+      <h1 className="display mt-7 text-[clamp(2.5rem,8vw,5.5rem)]">
+        <span className="line-mask">
+          <span className="line-in" style={at(1)}>
+            This page doesn’t exist.
+          </span>
+        </span>
       </h1>
-      <p className="rise-in mt-2 text-prose" style={at(2)}>
+      <p className="mt-6 max-w-[46ch] text-prose">
         It may have moved, or the link that brought you here was already wrong.
       </p>
-      <p className="rise-in mt-8" style={at(3)}>
+      <p className="mt-10">
         <Link className="link" to="/">
           Back to the index
         </Link>
@@ -54,13 +60,17 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <Message label="Error">
-      <h1 className="rise-in mt-4" style={at(1)}>
-        This page didn’t load.
+      <h1 className="display mt-7 text-[clamp(2.5rem,8vw,5.5rem)]">
+        <span className="line-mask">
+          <span className="line-in" style={at(1)}>
+            This page didn’t load.
+          </span>
+        </span>
       </h1>
-      <p className="rise-in mt-2 text-prose" style={at(2)}>
+      <p className="mt-6 max-w-[46ch] text-prose">
         Something broke on the way here. Trying again usually settles it.
       </p>
-      <p className="rise-in mt-8" style={at(3)}>
+      <p className="mt-10">
         <button
           type="button"
           className="link"
@@ -93,9 +103,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
       },
       { name: "author", content: "Adiel Vásquez" },
-      // Paints the mobile browser chrome the same paper/ink as the page.
-      { name: "theme-color", content: "#f2ede2", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#1a1815", media: "(prefers-color-scheme: dark)" },
+      // The site is light-only, so the browser chrome matches the paper
+      // regardless of what the reader's system prefers.
+      { name: "color-scheme", content: "light" },
+      { name: "theme-color", content: "#f5f4f2" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
@@ -133,9 +144,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        // Variable-range requests (not a semicolon list of static weights) — the
-        // body's 450 and any in-between weight only render correctly this way.
-        href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap",
+        // Two families only. Geist is requested as a variable range so any
+        // weight the design asks for actually renders; Instrument Serif ships
+        // a single weight by design and is used for display alone.
+        href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap",
       },
     ],
   }),
