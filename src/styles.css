@@ -3,31 +3,27 @@
 @import "tw-animate-css";
 
 /*
- * Design system: text-first, near-monochrome personal site.
- * Ink on warm off-white, a single restrained accent (dry clay red).
+ * Design system — light only.
  *
- * Colour is expressed with light-dark(), so the palette follows the reader's
- * system preference on its own. `.light` / `.dark` on <html> force a scheme.
+ * A warm off-white ground with white cards floating on it, near-black ink,
+ * and a display serif doing all of the shouting so nothing else has to.
+ * Two families total: Instrument Serif for display, Geist for everything else.
+ *
+ * Colour values are OKLCH. Every text pair here was measured against its own
+ * background and clears WCAG AA (4.5:1) at the size it is actually used.
  */
 
-@custom-variant dark {
-  @media (prefers-color-scheme: dark) {
-    &:where(:not(.light *)) {
-      @slot;
-    }
-  }
-  &:where(.dark, .dark *) {
-    @slot;
-  }
-}
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-prose: var(--prose);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-hairline: var(--hairline);
+  --color-accent: var(--accent);
+
+  /* Mapped so the unused src/components/ui/* scaffold still compiles. */
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -37,92 +33,81 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-prose: var(--prose);
-  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-hairline: var(--hairline);
+
+  --shadow-card: var(--elevation-card);
+  --shadow-lift: var(--elevation-lift);
+  --shadow-panel: var(--elevation-panel);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
 
   /*
-   * Interaction is quick — hover feedback lands in 150ms, the entrance in
-   * about half a second. Slower than this and the page feels like it is
-   * performing rather than responding.
+   * Three radii, and they are concentric by construction: the gallery panel
+   * is 20px with 12px of padding, so anything inset in it is 8px (20 − 12).
+   * Project cards carry their image edge-to-edge, so image and card share 14px.
    */
+  --radius-card: 14px;
+  --radius-panel: 20px;
+  --radius-inset: 8px;
+
+  /*
+   * Two curves and nothing else. `soft` is the enter/exit curve for anything
+   * that travels; `strong` is the quick expo-out used for hover feedback.
+   */
+  --ease-soft: cubic-bezier(0.2, 0, 0, 1);
   --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
-  --animate-rise: rise 0.55s var(--ease-strong) both;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
+/*
+ * shadcn's token names are kept so the unused src/components/ui/* scaffold
+ * still compiles. Nothing on the page reads them.
+ */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+
+  --background: oklch(0.968 0.003 85);
+  --surface: oklch(1 0 0);
+  --foreground: oklch(0.205 0.005 60);
+  --prose: oklch(0.442 0.006 62);
+  --muted-foreground: oklch(0.535 0.006 62);
+  --border: oklch(0.905 0.004 85);
+  --hairline: oklch(0.936 0.003 85);
+  --accent: oklch(0.52 0.13 40);
+
+  /*
+   * Elevation is shadow, never a border. Two layers each: a tight contact
+   * shadow that keeps the card attached to the page, and a wide soft one
+   * that lifts it off.
+   */
+  --elevation-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.1);
+  --elevation-lift: 0 2px 6px oklch(0 0 0 / 0.05), 0 22px 48px -22px oklch(0 0 0 / 0.18);
+  --elevation-panel: 0 8px 24px -8px oklch(0 0 0 / 0.12), 0 40px 80px -32px oklch(0 0 0 / 0.28);
 
   --radius: 0.25rem;
-  /* Manila. Warm paper stock, not white — the sheet is the design. */
-  --background: light-dark(oklch(0.943 0.014 90), oklch(0.19 0.008 72));
-  --foreground: light-dark(oklch(0.243 0.007 63), oklch(0.925 0.01 88));
-  --card: light-dark(oklch(0.965 0.011 90), oklch(0.215 0.009 72));
+  --card: var(--surface);
   --card-foreground: var(--foreground);
-  --popover: var(--card);
+  --popover: var(--surface);
   --popover-foreground: var(--foreground);
-  --primary: light-dark(oklch(0.243 0.007 63), oklch(0.925 0.01 88));
-  --primary-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
-  /* The folder-tab stock: one step darker than the sheet. */
-  --secondary: light-dark(oklch(0.878 0.028 88), oklch(0.26 0.012 72));
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: oklch(0.94 0.004 85);
   --secondary-foreground: var(--foreground);
   --muted: var(--secondary);
-
-  /*
-   * Two tiers of ink. --prose is running text: dark enough to read as body
-   * copy. --muted-foreground is tertiary — index rows, labels, the colophon.
-   */
-  --prose: light-dark(oklch(0.44 0.012 68), oklch(0.755 0.01 84));
-  /* L tuned to clear 4.5:1 against both the page and the tab stock. */
-  --muted-foreground: light-dark(oklch(0.48 0.014 70), oklch(0.655 0.01 82));
-  /* Grease pencil. The only colour on the sheet. L tuned to clear 4.5:1 as text. */
-  --accent: light-dark(oklch(0.53 0.132 39), oklch(0.68 0.13 41));
-  --accent-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
-  --destructive: light-dark(oklch(0.52 0.17 27), oklch(0.65 0.17 27));
-  --destructive-foreground: light-dark(oklch(0.965 0.011 90), oklch(0.19 0.008 72));
-  --border: light-dark(oklch(0.845 0.018 86), oklch(1 0 0 / 13%));
-  --hairline: light-dark(oklch(0.885 0.016 87), oklch(1 0 0 / 8%));
-  --input: light-dark(oklch(0.845 0.018 86), oklch(1 0 0 / 15%));
-  --ring: light-dark(oklch(0.575 0.014 70), oklch(0.655 0.01 82));
-
-  /* Paper tooth. Reads heavier on ink, so dark gets a touch more. */
-  --grain-opacity: 0.05;
-}
-
-
-.light {
-  color-scheme: light;
-}
-
-.dark {
-  color-scheme: dark;
-  --grain-opacity: 0.06;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --grain-opacity: 0.06;
-  }
+  --accent-foreground: var(--background);
+  --destructive: oklch(0.52 0.17 27);
+  --destructive-foreground: var(--background);
+  --input: var(--border);
+  --ring: var(--foreground);
 }
 
 @layer base {
@@ -132,41 +117,22 @@
 
   html {
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Punctuation hangs into the margin so the text block optically aligns. */
     hanging-punctuation: first last;
+    scroll-behavior: smooth;
   }
 
   body {
-    position: relative;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    /*
-     * Geist is variable (400..700). 450 is the body: a hair sturdier
-     * than book weight, which is what holds a 14px page together without
-     * anything being set large. Emphasis is 500-600, never a size jump.
-     */
-    font-weight: 450;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    font-weight: 400;
     font-feature-settings: "calt";
-    caret-color: var(--color-accent);
   }
 
-  /*
-   * A single sheet of grain over everything. Fixed so it behaves like paper
-   * the page is printed on rather than something that scrolls with it.
-   */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: var(--grain-opacity);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Prose sets its own rag; headings should never leave a word stranded. */
   p {
     text-wrap: pretty;
   }
@@ -174,28 +140,30 @@
   h1,
   h2,
   h3 {
-    font-size: inherit;
-    font-weight: 500;
     text-wrap: balance;
+    font-weight: 400;
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-accent) 22%, transparent);
+    background-color: color-mix(in oklab, var(--color-accent) 18%, transparent);
   }
 
   :focus-visible {
-    outline: 1.5px solid var(--color-accent);
+    outline: 2px solid var(--color-foreground);
     outline-offset: 3px;
-    border-radius: 2px;
+    border-radius: 3px;
   }
 
-  /* Keyboard users get the ring; pointer users never see it. */
   :focus:not(:focus-visible) {
     outline: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
@@ -203,89 +171,109 @@
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
-/*
- * Inline prose link: a dotted rule, never a button. Dotted rather than solid
- * keeps a paragraph with four links in it from reading as four underlines.
- */
-@utility link {
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-  transition:
-    color 150ms var(--ease-strong),
-    text-decoration-color 150ms var(--ease-strong);
+/* ── Type ──────────────────────────────────────────────────────────────── */
 
-  &:hover {
-    color: var(--color-accent);
-    text-decoration-color: var(--color-accent);
-  }
+/*
+ * The display face. Instrument Serif ships at a single weight, which is the
+ * point: hierarchy comes from size and space, never from a heavier cut.
+ */
+@utility display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.02em;
 }
 
 /*
- * Entrance. Each block sets --i and inherits the same curve, so the page
- * assembles top-to-bottom instead of arriving all at once.
+ * Small uppercase label. The only place caps appear, and the reason section
+ * headings never need to compete with the display type.
  */
-@utility rise-in {
-  animation: rise 0.55s var(--ease-strong) both;
-  animation-delay: calc(var(--i, 0) * 55ms);
-}
-
-/*
- * ── Archival craft layer ───────────────────────────────────────────────
- * Everything below is the handmade apparatus: catalog labels, cut tabs,
- * leader dots, the perforated left margin. All structure, no decoration
- * that the eye has to work around.
- */
-
-/*
- * A typed catalog label. Small, mono, letterspaced — the only place caps
- * appear, and the reason section headings never need to be set large.
- */
-@utility label-tag {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
+@utility label {
+  font-size: 0.6875rem;
   line-height: 1;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 
+/* Inline prose link: underline from the font's own metrics, colour on hover. */
+@utility link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, currentColor 32%, transparent);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.2em;
+  text-decoration-skip-ink: auto;
+  transition: text-decoration-color 200ms var(--ease-strong);
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+
 /*
- * The folder tab. Sits on the top edge of the sheet, squared on the inside
- * and clipped on the outside so it reads as cut card stock, not a chip.
+ * Staged entrance for the masthead. A keyframe rather than a transition
+ * because it runs once, on load, in sequence — the line rides up from behind
+ * its own mask. The mask gets a little vertical slack so descenders aren't
+ * clipped as the line settles.
  */
-@utility tab {
-  background-color: var(--color-secondary);
-  border-top-left-radius: 3px;
-  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 100%, 0 100%);
+@utility line-mask {
+  display: block;
+  overflow: hidden;
+  padding-block-end: 0.14em;
+  margin-block-end: -0.14em;
+}
+
+@utility line-in {
+  display: block;
+  animation: line-up 1s var(--ease-soft) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+@keyframes line-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
 }
 
 /*
- * Dotted leaders, the way a table of contents sets them: the dots are drawn
- * by the gap, so the two ends of the row stay where the grid puts them.
+ * Scroll reveal. A transition rather than a keyframe so it stays interruptible
+ * if the reader scrolls back before it finishes. `Reveal` flips data-shown.
  */
-@utility leader {
-  flex: 1 1 auto;
-  min-width: 1.5rem;
-  align-self: end;
-  height: 0.42em;
-  border-bottom: 1px dotted var(--color-border);
-  transition: border-color 150ms var(--ease-strong);
+@utility reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 800ms var(--ease-soft),
+    transform 800ms var(--ease-soft);
+
+  &[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* The index numeral column: tabular, tertiary, never wider than it needs. */
-@utility idx {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  color: var(--color-muted-foreground);
-  transition: color 150ms var(--ease-strong);
+/* Without JS the observer never fires, so the content must start visible. */
+@media (scripting: none) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Images carry a hairline of pure black at low alpha — never a tinted
+ * neutral, which would pick up the paper underneath and read as a dirty edge.
+ */
+@utility image-edge {
+  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline-offset: -1px;
 }
