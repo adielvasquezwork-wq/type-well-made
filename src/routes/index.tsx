@@ -334,8 +334,9 @@ function Home() {
 
           {groups.map((group) => (
             <div key={group.year}>
-              <p className="rise-in flex items-baseline gap-2" style={at(next())}>
-                <span className="label-tag text-muted-foreground/70">{group.year}</span>
+              <p className="rise-in flex items-baseline gap-2.5" style={at(next())}>
+                <span className="label-tag text-accent/75">{group.year}</span>
+                <span aria-hidden className="h-px flex-1 translate-y-[-0.2em] bg-hairline" />
               </p>
               <ul className="mt-1">
                 {group.rows.map((row) => (
