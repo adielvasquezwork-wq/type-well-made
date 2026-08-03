@@ -23,7 +23,7 @@ export function Mark({ className = "" }: { className?: string }) {
        * Nudged down a hair. A capital A has no descender, so a line box
        * centred by geometry leaves it sitting visibly high in the disc.
        */}
-      <span className="display relative translate-y-px text-[1.2rem] leading-none text-background">
+      <span className="relative translate-y-px font-serif text-[1.2rem] leading-none text-background">
         A
       </span>
     </span>
