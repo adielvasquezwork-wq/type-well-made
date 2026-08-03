@@ -28,8 +28,6 @@
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-placeholder: var(--placeholder);
-  --color-chip: var(--chip);
-  --color-chip-ink: var(--chip-ink);
 
   /* Mapped so the unused src/components/ui/* scaffold still compiles. */
   --color-card: var(--card);
@@ -64,7 +62,6 @@
   --radius-frame: 14px;
   --radius-panel: 20px;
   --radius-inset: 8px;
-  --radius-chip: 7px;
 
   /*
    * Two curves and nothing else. `soft` is the enter/exit curve for anything
@@ -86,9 +83,6 @@
   --hairline: oklch(0.945 0.001 90);
   /* The empty frame. A neutral grey, never a tinted one. */
   --placeholder: oklch(0.925 0.001 90);
-
-  --chip: oklch(0.938 0.002 90);
-  --chip-ink: oklch(0.42 0.004 62);
 
   /*
    * The page is a single measured width, and several things that sit outside
@@ -175,7 +169,7 @@
     font-weight: 400;
   }
 
-  /* Anchor navigation has to clear the fixed chips. */
+  /* Anchor navigation has to clear the fixed nav. */
   [id] {
     scroll-margin-top: 6rem;
   }
@@ -299,41 +293,79 @@
 }
 
 /*
- * Nav and utility chip — a keycap rather than a pill, which is what keeps a
- * row of four from reading as a set of tags. Structure comes from an inset
- * hairline so the edge, fill and lift all animate as one property.
+ * The one solid affordance on the page: a black pill with white text, shadow
+ * for lift. Every place the page asks for a click twice as hard — the footer
+ * CTA, the nav's Contact link, the section you're currently reading — uses
+ * exactly this, so the whole site speaks through a single confident button
+ * rather than several competing ones.
  */
 @utility chip {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  border-radius: var(--radius-chip);
-  padding: 0.4375rem 0.625rem 0.375rem;
-  background-color: var(--color-chip);
-  color: var(--color-chip-ink);
-  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.04);
+  border-radius: 999px;
+  padding: 0.5rem 0.9375rem;
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  box-shadow: var(--elevation-card);
   white-space: nowrap;
   transition:
     box-shadow 200ms var(--ease-strong),
     background-color 200ms var(--ease-strong),
-    color 200ms var(--ease-strong),
     transform 160ms var(--ease-strong);
 
   &:hover {
-    background-color: color-mix(in oklab, var(--color-chip) 45%, var(--color-surface));
+    background-color: color-mix(in oklab, var(--color-foreground) 88%, var(--color-background));
+    box-shadow: var(--elevation-lift);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+/*
+ * A section link in the nav. No fill, no border, nothing to read as a row of
+ * buttons before you've touched any of them — on the page's own paper the
+ * backdrop blur below is imperceptible, so at rest this is just words.
+ *
+ * The blur exists for what the paper isn't: the work underneath is
+ * photographic and often saturated, and this nav stays fixed while it scrolls
+ * past beneath. A full-width bar behind the whole row would be the fade this
+ * page doesn't want; a soft, tightly-fitted halo behind each word is a
+ * different thing — it protects legibility without ever reading as a shape of
+ * its own. The section you're currently reading is the one exception, and it
+ * borrows the same solid pill as `chip` rather than inventing a second filled
+ * state.
+ */
+@utility navlink {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.8125rem;
+  border-radius: 999px;
+  color: var(--color-muted-foreground);
+  background-color: color-mix(in oklab, var(--color-background) 35%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+  transition:
+    color 200ms var(--ease-strong),
+    background-color 200ms var(--ease-strong),
+    box-shadow 200ms var(--ease-strong),
+    transform 160ms var(--ease-strong);
+
+  &:hover {
     color: var(--color-foreground);
-    box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.08);
   }
 
   &:active {
     transform: scale(0.96);
   }
 
-  /* The one filled state: the section you are currently reading. */
   &[data-current="true"] {
-    background-color: var(--color-foreground);
     color: var(--color-background);
-    box-shadow: none;
+    background-color: var(--color-foreground);
+    box-shadow: var(--elevation-card);
   }
 }
 
