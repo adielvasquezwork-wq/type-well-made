@@ -15,14 +15,21 @@ export type Work = {
 const RAIL_COUNT = 3;
 
 /**
- * The slide width, and the reason the rail works.
- *
- * At 78vw the next image is always cut by the right edge of the screen, at
- * every width — that half-visible frame is the only thing telling you the row
- * scrolls, so it can never be allowed to disappear. The 44rem ceiling stops
- * a single image from becoming the whole page on a wide monitor.
+ * The slide width, used only where there's no image to size by (the empty/
+ * pending placeholder, and the caption's max-width). At 78vw the next slide
+ * is always cut by the right edge of the screen, at every width — that
+ * half-visible frame is the only thing telling you the row scrolls, so it
+ * can never be allowed to disappear. The 44rem ceiling stops a single frame
+ * from becoming the whole page on a wide monitor.
  */
 const SLIDE = "w-[min(78vw,44rem)]";
+
+/**
+ * Every real frame is held to this height and left to find its own width —
+ * a landscape shot and a portrait shot sit at the same height instead of one
+ * being cropped to match the other's box.
+ */
+const FRAME_HEIGHT = "h-[492px]";
 
 /**
  * One project: a rail of frames, and a caption under its first frame.
@@ -58,13 +65,13 @@ export function ProjectRow({ work, onOpen }: { work: Work; onOpen: (work: Work) 
               type="button"
               onClick={openUnlessDragged}
               aria-label={`${work.title} — open the full gallery`}
-              className={`${SLIDE} image-edge relative aspect-[16/9] overflow-hidden rounded-frame bg-placeholder transition-transform duration-200 ease-strong active:scale-[0.995]`}
+              className={`${FRAME_HEIGHT} image-edge relative shrink-0 overflow-hidden rounded-frame bg-placeholder transition-transform duration-200 ease-strong active:scale-[0.995]`}
             >
               <Frame
                 src={src}
                 alt={`${work.title}, frame ${i + 1}`}
                 eager={i === 0}
-                className="pointer-events-none size-full object-cover"
+                className="pointer-events-none h-full w-auto"
               />
             </button>
           ))}
@@ -74,7 +81,7 @@ export function ProjectRow({ work, onOpen }: { work: Work; onOpen: (work: Work) 
            three grey rectangles pretending to be work. */
         <div className="page">
           <div
-            className={`${SLIDE} image-edge grid aspect-[16/9] place-items-center rounded-frame bg-placeholder`}
+            className={`${SLIDE} ${FRAME_HEIGHT} image-edge grid place-items-center rounded-frame bg-placeholder`}
           >
             <span className="label text-muted-foreground">{work.pending ?? "In progress"}</span>
           </div>
