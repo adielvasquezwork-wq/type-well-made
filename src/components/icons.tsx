@@ -48,6 +48,21 @@ export function Close({ className = "" }: IconProps) {
   );
 }
 
+/**
+ * The mark that precedes a named link in prose. Drawn as six strokes through
+ * a common centre rather than as a typed asterisk: the character sits on the
+ * cap line in most faces, which would hang it above the words it belongs to.
+ */
+export function Asterisk({ className = "" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8 2.75v10.5" />
+      <path d="m3.45 5.375 9.1 5.25" />
+      <path d="m3.45 10.625 9.1-5.25" />
+    </svg>
+  );
+}
+
 /** Gallery paging, mirrored for the two directions. */
 export function Chevron({ className = "" }: IconProps) {
   return (

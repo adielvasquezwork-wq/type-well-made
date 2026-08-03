@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import { LocalTime } from "@/components/LocalTime";
 import { SoundToggle } from "@/components/SoundToggle";
 import { Reveal } from "@/components/Reveal";
 import { Lightbox } from "@/components/Lightbox";
+import { Nav } from "@/components/Nav";
+import { Mark } from "@/components/Mark";
 import { ProjectCard, type Work } from "@/components/ProjectCard";
-import { CardFan } from "@/components/CardFan";
-import { ArrowUpRight } from "@/components/icons";
+import { CoverStrip, Ticks, type Print } from "@/components/CoverStrip";
+import { ArrowUpRight, Asterisk } from "@/components/icons";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,15 +34,29 @@ export const Route = createFileRoute("/")({
 const work: Work[] = [
   {
     title: "Opus",
+    blurb: "Identity, site and motion system for a research studio that ships in public.",
     meta: "Brand, web, motion",
     year: "2026",
     tint: "oklch(0.22 0.006 60)",
     ink: "light",
   },
-  { title: "Semantic", meta: "Brand, web, motion", year: "2026", tint: "oklch(0.93 0.03 85)" },
-  { title: "Maters", meta: "Web, vibecoding", year: "2026", tint: "oklch(0.9 0.03 145)" },
+  {
+    title: "Semantic",
+    blurb: "A brand built on one rule: meaning arrives before decoration does.",
+    meta: "Brand, web, motion",
+    year: "2026",
+    tint: "oklch(0.93 0.03 85)",
+  },
+  {
+    title: "Maters",
+    blurb: "Designed and vibecoded end to end in a week, without losing the craft.",
+    meta: "Web, vibecoding",
+    year: "2026",
+    tint: "oklch(0.9 0.03 145)",
+  },
   {
     title: "Serveo",
+    blurb: "Naming, identity and website for a service platform starting from zero.",
     href: "https://adiel.design/serveo",
     meta: "Brand, web, naming",
     year: "2025",
@@ -54,6 +70,7 @@ const work: Work[] = [
   },
   {
     title: "Grain",
+    blurb: "A generative identity that draws its own patterns, one seed at a time.",
     href: "https://adiel.design/grain",
     meta: "Brand, web, naming",
     year: "2025",
@@ -67,31 +84,59 @@ const work: Work[] = [
       "/work/grain/grain-4-mark.jpg",
     ],
   },
-  { title: "Cipher", meta: "Brand, web", year: "2025", tint: "oklch(0.89 0.008 70)" },
+  {
+    title: "Cipher",
+    blurb: "Identity and site for a security company that wanted to say much less.",
+    meta: "Brand, web",
+    year: "2025",
+    tint: "oklch(0.89 0.008 70)",
+  },
 ];
 
 /**
- * Groups the flat list by year, newest first, and hands every row a running
- * catalog number across the whole list — the numbers belong to the archive,
- * not to the year, so they never restart.
+ * The playground deck. Photographic frames and flat covers alternate, and no
+ * two neighbours come from the same project — the row should read as a spread
+ * of unrelated prints rather than as two case studies shuffled together.
+ *
+ * Every card carries a tint whether or not it carries art, so a slow or dead
+ * CDN costs the deck an image and not its composition.
  */
-function byYear(rows: Work[]) {
-  const numbered = rows.map((row, i) => ({ row, no: String(i + 1).padStart(2, "0") }));
-  const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b.localeCompare(a));
-  return years.map((year) => ({ year, items: numbered.filter((n) => n.row.year === year) }));
-}
+const prints: Print[] = [
+  { src: "/work/grain/grain-1-palette.jpg", tint: "oklch(0.87 0.025 250)" },
+  { title: "Opus", tint: "oklch(0.22 0.006 60)", ink: "light" },
+  {
+    src: "https://framerusercontent.com/images/l7zfXudj0Gcle7M4WBCLsDU5Y.jpg",
+    tint: "oklch(0.88 0.035 55)",
+  },
+  { src: "/work/grain/grain-2-pattern.jpg", tint: "oklch(0.87 0.025 250)" },
+  { title: "Semantic", tint: "oklch(0.93 0.03 85)" },
+  {
+    src: "https://framerusercontent.com/images/t48AH01F2ws45pm1R7STMBW0mgM.jpg",
+    tint: "oklch(0.88 0.035 55)",
+  },
+  { src: "/work/grain/grain-3-session.jpg", tint: "oklch(0.87 0.025 250)" },
+  { title: "Cipher", tint: "oklch(0.89 0.008 70)" },
+];
 
-/** Sets the entrance delay slot for a masthead line. */
+/** The practical facts, kept out of the prose so the prose can stay prose. */
+const facts = [
+  { term: "Based", detail: "Denver, Colorado" },
+  { term: "Focus", detail: "Brand, web, naming, art direction" },
+  { term: "Jury", detail: "Awwwards Young Jury" },
+];
+
+/** Sets the entrance delay slot for an intro block. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
-const container = "mx-auto w-full max-w-[76rem] px-6 sm:px-10 lg:px-14";
+const container = "mx-auto w-full max-w-[76rem] px-5 sm:px-10 lg:px-14";
 
-/** Section label with the rule that finishes it. */
-function SectionLabel({ children }: { children: string }) {
+/** Section marker with the rule that finishes it. */
+function SectionLabel({ children, count }: { children: string; count?: string }) {
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-4">
       <h2 className="label text-muted-foreground">{children}</h2>
       <span aria-hidden className="h-px flex-1 bg-border" />
+      {count ? <span className="label text-muted-foreground">{count}</span> : null}
     </div>
   );
 }
@@ -99,10 +144,10 @@ function SectionLabel({ children }: { children: string }) {
 /** Marks the state the page is in. The dot is the cue; the words carry it. */
 function Status() {
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="label inline-flex items-center gap-2 text-muted-foreground">
       <span
         aria-hidden
-        className="size-[7px] shrink-0 rounded-full bg-accent shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent)_14%,transparent)]"
+        className="size-[6px] shrink-0 rounded-full bg-accent shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent)_14%,transparent)]"
       />
       Available for 2026
     </span>
@@ -110,99 +155,112 @@ function Status() {
 }
 
 function Home() {
-  const groups = byYear(work);
   const [gallery, setGallery] = useState<Work | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-
-  // The masthead sits over the page; the bar only earns a surface once the
-  // content has started to slide underneath it.
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <>
-      <header
-        className={`fixed inset-x-0 top-0 z-40 transition-[background-color,border-color,backdrop-filter] duration-500 ease-soft ${
-          scrolled
-            ? "border-b border-hairline bg-background/85 backdrop-blur-md"
-            : "border-b border-transparent"
-        }`}
-      >
-        <div className={`${container} flex items-center justify-between gap-6 py-4`}>
-          <a
-            href="#top"
-            className="label transition-opacity duration-200 ease-strong hover:opacity-60"
-          >
-            Adiel Vásquez
-          </a>
-          <div className="label flex items-center gap-6 text-muted-foreground">
-            <span className="hidden sm:inline-flex">
-              <Status />
-            </span>
-            <a
-              href="mailto:hello@adiel.design"
-              className="transition-colors duration-200 ease-strong hover:text-foreground"
-            >
-              {/* The full address needs more room than a phone has beside the
-                  wordmark, so small screens get the short label instead. */}
-              <span className="sm:hidden">Email</span>
-              <span className="hidden sm:inline">hello@adiel.design</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      <Nav />
 
       <main id="top">
         {/*
-         * Masthead. The name arrives a line at a time from behind its own
-         * mask — the one staged, run-once sequence on the page.
+         * The masthead is deliberately small. The old one set the name at
+         * 10rem and spent a whole screen doing it; the work is the thing
+         * worth that much room, so the introduction now costs a card's height
+         * and hands the page straight over to the grid.
          */}
-        <section className={`${container} pt-36 pb-20 sm:pt-48 sm:pb-28`}>
-          <p className="line-mask label text-muted-foreground">
-            <span className="line-in inline-block" style={at(0)}>
-              Independent brand &amp; web designer
-            </span>
+        <section className={`${container} relative pt-32 pb-16 sm:pt-40 sm:pb-20`}>
+          {/* The introduction is left-weighted, which leaves the right of the
+              masthead empty. The marks give that half something to be. */}
+          <Ticks className="pointer-events-none absolute top-32 right-16 hidden h-44 -rotate-12 text-foreground/30 lg:block" />
+
+          <div className="flex items-center gap-3.5 rise-in" style={at(0)}>
+            <Mark />
+            <div className="min-w-0">
+              <h1 className="text-[0.9375rem] leading-tight font-medium">Adiel Vásquez</h1>
+              <p className="text-[0.9375rem] leading-tight text-muted-foreground">
+                Independent brand &amp; web designer
+              </p>
+            </div>
+          </div>
+
+          {/* Held at the name's size so the masthead reads as one block rather
+              than as a small name introducing a larger paragraph. */}
+          <p
+            className="mt-7 max-w-[54ch] text-base leading-[1.62] text-prose rise-in"
+            style={at(1)}
+          >
+            I work with startups and studios on identities and websites with real character —
+            concept first, execution obsessed, allergic to generic. I sit on the{" "}
+            <a
+              className="link inline-flex items-baseline gap-1"
+              href="https://www.awwwards.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Asterisk className="size-3 translate-y-px self-center text-accent" />
+              Awwwards
+            </a>{" "}
+            Young Jury, care <em className="stress text-foreground">deeply</em> about craft, and
+            like to make people feel something through the work.
           </p>
 
-          <h1 className="display mt-8 text-[clamp(3.5rem,13vw,10rem)]">
-            <span className="line-mask">
-              <span className="line-in" style={at(1)}>
-                Adiel
-              </span>
-            </span>
-            <span className="line-mask">
-              <span className="line-in" style={at(2)}>
-                Vásquez
-              </span>
-            </span>
-          </h1>
+          <div className="mt-8 rise-in" style={at(2)}>
+            <Status />
+          </div>
+        </section>
 
-          {/* Prose sits in the right half — the asymmetry is what keeps the
-              masthead from reading as a centred title card. */}
-          <div className="mt-14 grid gap-8 lg:mt-20 lg:grid-cols-12">
+        <section id="work" className={`${container} pb-24 sm:pb-32`}>
+          <Reveal>
+            <SectionLabel count={`${work.length} projects`}>Selected work</SectionLabel>
+          </Reveal>
+
+          {/*
+           * A flat, even grid. The covers already carry six different colour
+           * temperatures — giving one of them a double-width slot on top of
+           * that would be two claims about hierarchy at once.
+           */}
+          <div className="mt-10 grid gap-x-6 gap-y-12 sm:mt-12 sm:grid-cols-2">
+            {work.map((row, i) => (
+              // Only the first card of a row staggers. Past that the delay
+              // outlasts the scroll and lands after the reader.
+              <Reveal key={row.title} delay={(i % 2) * 90}>
+                <ProjectCard work={row} onOpen={setGallery} />
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        <section id="about" className={`${container} pb-24 sm:pb-32`}>
+          <Reveal>
+            <SectionLabel>About</SectionLabel>
+          </Reveal>
+
+          {/* Prose sits in the right two-thirds. The facts hold the left, so
+              the asymmetry reads as two columns doing different jobs rather
+              than as a paragraph that lost its margin. */}
+          <div className="mt-10 grid gap-10 sm:mt-12 lg:grid-cols-12 lg:gap-8">
+            <dl className="space-y-6 lg:col-start-1 lg:col-end-5">
+              {facts.map((fact) => (
+                <div key={fact.term}>
+                  <dt className="label text-muted-foreground">{fact.term}</dt>
+                  <dd className="mt-2 max-w-[24ch] text-[0.9375rem] leading-[1.45]">
+                    {fact.detail}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
             <div className="lg:col-start-6 lg:col-end-13">
               <Reveal>
                 <div className="max-w-[54ch] space-y-5 text-prose">
                   <p className="text-[1.1875rem] leading-[1.55] text-foreground">
-                    I work with startups and studios on identities and websites with real character
-                    — concept-first, execution-obsessed, allergic to generic.
+                    Most days that means naming, identity systems, art direction and the site that
+                    carries them — built end to end, by one person, on purpose.
                   </p>
                   <p>
-                    Most days that means naming, identity systems, art direction and the site that
-                    carries them, built end to end. I sit on the{" "}
-                    <a
-                      className="link"
-                      href="https://www.awwwards.com/"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Awwwards
-                    </a>{" "}
-                    Young Jury, and keep references on{" "}
+                    Working alone is the point rather than the constraint: the brand and the build
+                    are the same decision made twice, and nothing gets lost in the handoff. I keep
+                    references on{" "}
                     <a
                       className="link"
                       href="https://www.cosmos.so/adiell"
@@ -220,7 +278,7 @@ function Home() {
                     >
                       Savee
                     </a>
-                    .
+                    , and write the CSS myself.
                   </p>
                   <p>
                     Taking on a small number of projects for 2026 — write to{" "}
@@ -235,64 +293,52 @@ function Home() {
           </div>
         </section>
 
-        <section className={`${container} pb-24 sm:pb-32`}>
-          <Reveal>
-            <SectionLabel>Selected work</SectionLabel>
+        {/*
+         * The playground runs the full width of the viewport and past both
+         * edges, which is the one place the page breaks its own margin. It
+         * gets no container for exactly that reason.
+         */}
+        <section id="playground" className="pb-24 sm:pb-32">
+          <div className={container}>
+            <Reveal>
+              <SectionLabel>Playground</SectionLabel>
+            </Reveal>
+          </div>
+
+          <Reveal className="mt-12 sm:mt-16">
+            <CoverStrip prints={prints} />
           </Reveal>
 
-          <div className="mt-12 flex flex-col gap-20 sm:gap-24">
-            {groups.map((group) => (
-              <div key={group.year}>
-                <Reveal>
-                  <p className="label mb-8 flex items-center gap-4 text-muted-foreground">
-                    <span aria-hidden className="h-px w-8 bg-foreground/25" />
-                    {group.year}
-                  </p>
-                </Reveal>
-
-                <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2">
-                  {group.items.map(({ row, no }, i) => (
-                    // Only the first two cards in a row stagger. Past that the
-                    // delay would outlast the scroll and land after the reader.
-                    <Reveal
-                      key={row.title}
-                      delay={Math.min(i, 1) * 90}
-                      className={i === 0 ? "sm:col-span-2" : ""}
-                    >
-                      <ProjectCard work={row} index={no} featured={i === 0} onOpen={setGallery} />
-                    </Reveal>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className={`${container} mt-12 sm:mt-16`}>
+            <Reveal>
+              {/* A sentence, so it is set as one. The mono caps elsewhere are
+                  for markers and values, never for copy that has to be read. */}
+              <p className="mx-auto max-w-[44ch] text-center text-[0.9375rem] text-muted-foreground">
+                Offcuts, tests and frames that never made it into a case study.
+              </p>
+            </Reveal>
           </div>
         </section>
 
-        {/* Elsewhere, given a surface of its own so the page has one moment
-            of white before the colophon. */}
-        <section className={`${container} pb-24 sm:pb-32`}>
+        <section id="archive" className={`${container} pb-24 sm:pb-32`}>
           <Reveal>
-            <div className="rounded-panel bg-surface px-8 py-16 text-center shadow-card sm:px-16 sm:py-20">
+            <div className="rounded-panel bg-surface px-6 py-14 text-center shadow-card sm:px-16 sm:py-20">
               <p className="label text-muted-foreground">Elsewhere</p>
 
-              {/* A spread of covers with contrasting weight — two flat tints,
-                  one photographic, one dark — rather than the first four. */}
-              <div className="mt-12 mb-14">
-                <CardFan items={[work[0], work[1], work[4], work[5]]} />
-              </div>
-
-              <p className="display mx-auto max-w-[14ch] text-[clamp(2rem,5vw,3.5rem)]">
+              <p className="display mx-auto mt-8 max-w-[14ch] text-[clamp(2.25rem,5.5vw,3.75rem)]">
                 The longer archive.
               </p>
+
               <p className="mx-auto mt-6 max-w-[46ch] text-prose">
                 Site of the day on A1Gallery, featured on Landbook and the Framer Gallery. Older
                 work and full case studies live on the main site.
               </p>
+
               <a
                 href="https://adiel.design/"
                 target="_blank"
                 rel="noreferrer"
-                className="group mt-10 inline-flex items-center gap-2.5 rounded-full border border-border px-6 py-3.5 text-[0.9375rem] transition-[background-color,border-color,color,transform] duration-300 ease-strong hover:border-foreground hover:bg-foreground hover:text-background active:scale-[0.96]"
+                className="group mt-10 inline-flex items-center gap-2.5 rounded-full bg-foreground px-6 py-3.5 text-[0.9375rem] text-background shadow-card transition-[box-shadow,transform] duration-300 ease-strong hover:shadow-lift active:scale-[0.96]"
               >
                 Visit adiel.design
                 <ArrowUpRight className="size-4 transition-transform duration-300 ease-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -303,7 +349,10 @@ function Home() {
 
         <footer className={`${container} pb-16`}>
           <div className="flex flex-col gap-8 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <nav className="label flex flex-wrap items-center gap-x-8 gap-y-4">
+            <nav
+              aria-label="Elsewhere"
+              className="label flex flex-wrap items-center gap-x-7 gap-y-4"
+            >
               {[
                 { label: "Contact", href: "mailto:hello@adiel.design" },
                 { label: "Twitter", href: "https://x.com/adieldesign" },

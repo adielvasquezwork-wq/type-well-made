@@ -144,10 +144,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        // Two families only. Geist is requested as a variable range so any
-        // weight the design asks for actually renders; Instrument Serif ships
-        // a single weight by design and is used for display alone.
-        href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap",
+        // Geist and Geist Mono are requested as variable ranges so any weight
+        // the design asks for actually renders. Instrument Serif ships a
+        // single weight by design; the italic is what the prose leans on, so
+        // both styles are requested.
+        href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap",
       },
     ],
   }),
