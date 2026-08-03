@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 /**
  * The page's sections, in the order they appear. The nav is generated from
- * this list rather than hand-written, so a chip can never point at a section
+ * this list rather than hand-written, so a link can never point at a section
  * that isn't there.
  */
 const sections = [
@@ -13,19 +13,20 @@ const sections = [
 ] as const;
 
 /**
- * Fixed chip navigation.
+ * Fixed navigation.
  *
- * The chips are keycaps rather than pills, and they carry their own surface,
- * so they stay legible over whatever is passing beneath them and the bar
- * itself never needs to grow a background on scroll. What sits behind them is
- * a masked blur: fully blurred at the very top, fading to nothing by the
- * bottom of the strip, which reads as the page softening under the chips
- * rather than as a bar appearing.
+ * At rest it's just words — no pills, no surface, no bar. The section links
+ * sit directly on the page the way a masthead does, and the only fill on the
+ * whole row is the one section you're currently reading, which borrows the
+ * same solid pill as the Contact button. That's deliberate: a nav that looks
+ * like four buttons before you've touched any of them reads as chrome, and
+ * this page would rather read as content with a quiet way back to the top.
  *
- * The filled chip marks the section you are currently reading — a real state,
- * not a hover echo — so the nav answers "where am I" as well as "where can I
- * go". `Playground` and `Archive` step out below `sm`: four chips plus the
- * contact key overflow a phone, and both sections are a scroll away regardless.
+ * The filled link marks the section you are currently reading — a real
+ * state, not a hover echo — so the nav answers "where am I" as well as
+ * "where can I go". `Thoughts` and `Playground` step out below `sm`: four
+ * links plus Contact overflow a phone, and both sections are a scroll away
+ * regardless.
  */
 export function Nav() {
   const [current, setCurrent] = useState<string | null>(null);
@@ -54,16 +55,8 @@ export function Nav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-40">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-background/45 backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,black_0%,black_42%,transparent_100%)]"
-      />
-
-      <nav
-        aria-label="Sections"
-        className="page relative flex items-center justify-between gap-4 py-5"
-      >
-        <ul className="flex items-center gap-1.5">
+      <nav aria-label="Sections" className="page flex items-center justify-between gap-4 py-5">
+        <ul className="flex items-center gap-1">
           {sections.map((section, i) => (
             <li
               key={section.id}
@@ -75,7 +68,7 @@ export function Nav() {
                 href={`#${section.id}`}
                 data-current={current === section.id}
                 aria-current={current === section.id ? "true" : undefined}
-                className="chip label rise-in"
+                className="navlink label rise-in"
                 style={{ "--i": i } as React.CSSProperties}
               >
                 {section.label}
