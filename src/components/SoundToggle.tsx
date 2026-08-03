@@ -117,50 +117,20 @@ export function SoundToggle() {
     };
   }, [startAmbient]);
 
-  // Considered interaction sound: a short, filtered tick on hover, a blockier
-  // knock on click. Both are scoped to `a[href]` and real buttons only — an
-  // unreleased work row or anything else with nothing behind it stays silent.
-  // Pitch and gain drift slightly each time so a row of six doesn't sound
-  // like a metronome, and a minimum gap keeps a fast sweep from turning
-  // into a clatter.
+  // Considered interaction sound: a blocky knock, once per click. Scoped to
+  // `a[href]` and real buttons only — an unreleased work row or anything
+  // else with nothing behind it stays silent. There is no hover sound: a
+  // rail of images fires `pointerover` on nearly every pixel of a scan
+  // across them, and a chime for each one is exactly the overload a single
+  // sound-per-decision doesn't have. Pitch and gain drift slightly each time
+  // so a quick run of clicks doesn't sound like a metronome.
   useEffect(() => {
     if (!on) return;
     const isSoundable = (target: EventTarget | null) =>
       (target as HTMLElement | null)?.closest("a[href], button:not([disabled])");
 
-    const notes = [660, 740, 780, 830];
-    let lastTick = 0;
-    const tick = () => {
-      const { ctx, master } = ensureCtx();
-      const t = ctx.currentTime;
-      if (t - lastTick < 0.08) return;
-      lastTick = t;
-
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const g = ctx.createGain();
-
-      osc.type = "sine";
-      const note = notes[Math.floor(Math.random() * notes.length)];
-      osc.frequency.value = note + (Math.random() * 6 - 3);
-
-      filter.type = "lowpass";
-      filter.frequency.value = 2200;
-      filter.Q.value = 0.4;
-
-      const peak = 0.017 + Math.random() * 0.008;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(peak, t + 0.018);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-
-      osc.connect(filter).connect(g).connect(master.context.destination);
-      osc.start(t);
-      osc.stop(t + 0.18);
-    };
-
-    // A squarer, lower knock for the actual commit of a click — a wooden
-    // block rather than the hover tick's glassy chime. Pitch falls fast
-    // over the first 40ms, which is what gives it the blocky, struck feel.
+    // A squarer, low knock — a wooden block rather than a chime. Pitch falls
+    // fast over the first 40ms, which is what gives it the blocky, struck feel.
     const click = () => {
       const { ctx, master } = ensureCtx();
       const t = ctx.currentTime;
@@ -187,18 +157,11 @@ export function SoundToggle() {
       osc.stop(t + 0.07);
     };
 
-    const hoverHandler = (e: Event) => {
-      if (isSoundable(e.target)) tick();
-    };
     const clickHandler = (e: Event) => {
       if (isSoundable(e.target)) click();
     };
-    document.addEventListener("pointerover", hoverHandler);
     document.addEventListener("click", clickHandler);
-    return () => {
-      document.removeEventListener("pointerover", hoverHandler);
-      document.removeEventListener("click", clickHandler);
-    };
+    return () => document.removeEventListener("click", clickHandler);
   }, [on, ensureCtx]);
 
   useEffect(() => () => stopRef.current?.(), []);

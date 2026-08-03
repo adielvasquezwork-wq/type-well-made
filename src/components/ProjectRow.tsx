@@ -1,5 +1,5 @@
-import { useRef } from "react";
 import { Frame } from "@/components/Frame";
+import { useDragRail } from "@/hooks/useDragRail";
 
 export type Work = {
   title: string;
@@ -24,93 +24,34 @@ const RAIL_COUNT = 3;
  */
 const SLIDE = "w-[min(78vw,44rem)]";
 
-/** Beyond this many pixels of pointer travel, a press is a drag, not a click. */
-const DRAG_THRESHOLD = 6;
-
 /**
  * One project: a rail of frames, and a caption under its first frame.
  *
  * The rail is a native scroll-snap container first — it swipes on touch,
  * scrolls on a trackpad, and tabs through with a keyboard for free. What it
- * doesn't get for free is a mouse: a trackpad or touchscreen can push the
- * content sideways directly, but a mouse has no equivalent gesture. So the
- * rail also answers to a plain click-and-drag, tracked by hand with pointer
- * events and gated to `pointerType === "mouse"` — touch and pen keep using
- * their own native scrolling untouched.
+ * doesn't get for free is a mouse, which has no equivalent gesture for
+ * pushing content sideways — `useDragRail` covers that with a click-and-drag
+ * that carries momentum on release, gated to mouse pointers only, so touch
+ * and trackpad keep their own native scrolling untouched.
  *
- * Two things only show up once you try to make this work, not from reading
- * about it:
- *
- * - `setPointerCapture` has to wait until the gesture has actually crossed
- *   `DRAG_THRESHOLD`. Call it unconditionally on every pointerdown and
- *   Chromium retargets the following `click` to the capturing element — the
- *   rail, which has no click handler — so a plain, undragged click on a
- *   frame silently stops opening the gallery.
- * - `scroll-snap-type` has to switch off for the duration of the drag.
- *   Mandatory snapping re-centres the rail on the nearest frame the instant
- *   `scrollLeft` is set by hand, so every pointermove gets fought back to
- *   where it started and the rail never visibly moves. `data-dragging`
- *   toggles it off on the element itself — imperative, not React state,
- *   since state would mean a re-render on every pixel of mouse travel.
- *
- * A frame is a real button that opens the gallery, which means a drag still
- * has to be told apart from a click: once the gesture is marked as a drag,
- * the click it produces on release is swallowed, so pulling the rail across
- * the screen never accidentally opens a project.
+ * A frame is a real button that opens the gallery, which means a drag has to
+ * be told apart from a click — `wasDragged()` is what tells them apart.
  */
 export function ProjectRow({ work, onOpen }: { work: Work; onOpen: (work: Work) => void }) {
-  const railRef = useRef<HTMLDivElement>(null);
-  const drag = useRef({ active: false, startX: 0, startScroll: 0, moved: false });
+  const { ref, bind, wasDragged } = useDragRail<HTMLDivElement>();
 
   const frames = work.images?.slice(0, RAIL_COUNT) ?? [];
   const hasGallery = frames.length > 0;
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
-    const el = railRef.current;
-    if (!el) return;
-    drag.current = { active: true, startX: e.clientX, startScroll: el.scrollLeft, moved: false };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = railRef.current;
-    if (!el || !drag.current.active) return;
-    const delta = e.clientX - drag.current.startX;
-
-    if (!drag.current.moved) {
-      if (Math.abs(delta) <= DRAG_THRESHOLD) return;
-      drag.current.moved = true;
-      el.dataset.dragging = "true";
-      el.setPointerCapture(e.pointerId);
-    }
-
-    el.scrollLeft = drag.current.startScroll - delta;
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = railRef.current;
-    if (el?.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
-    if (el) delete el.dataset.dragging;
-    drag.current.active = false;
-  };
-
   const openUnlessDragged = () => {
-    if (drag.current.moved) return;
+    if (wasDragged()) return;
     onOpen(work);
   };
 
   return (
     <article>
       {hasGallery ? (
-        <div
-          ref={railRef}
-          className="rail cursor-grab active:cursor-grabbing"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          onDragStart={(e) => e.preventDefault()}
-        >
+        <div ref={ref} className="rail cursor-grab active:cursor-grabbing" {...bind}>
           {frames.map((src, i) => (
             <button
               key={src}
