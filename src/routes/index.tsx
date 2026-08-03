@@ -40,26 +40,26 @@ const work: Work[] = [
   {
     title: "Grain",
     blurb: "A generative identity that draws its own patterns, one seed at a time.",
-    // Frames from the project's own brand reel — palette card, pattern
-    // generator, a live session, and the mark.
+    // EXPERIMENT: hotlinked from jkane.co's Vizcom case study to test whether
+    // the page's "sloppiness" is about image treatment rather than layout.
+    // Not the project's real imagery — swap back before this site goes live.
     images: [
-      "/work/grain/grain-1-palette.jpg",
-      "/work/grain/grain-2-pattern.jpg",
-      "/work/grain/grain-3-session.jpg",
-      "/work/grain/grain-4-mark.jpg",
+      "https://cdn.sanity.io/images/6tgemksh/production/0546e1deb8f7f793aa893a3a564bb80891975354-1920x1080.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/6tgemksh/production/4a4b4a59557f5a192114f9bda62d8d0517386d19-1920x1080.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/6tgemksh/production/8630397cf0fae21f4a74f801629d14ec1cd4071c-1920x1080.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/6tgemksh/production/ad14c73f6777da39bef7154b158fcdf32c2616f6-1920x1080.jpg?fit=max&auto=format",
     ],
   },
   {
     title: "Serveo",
     blurb: "Naming, identity and website for a service platform starting from zero.",
-    // TODO: these four are still served by the old site's Framer CDN. Move the
-    // files into /public/work/serveo/ before that site comes down — this is the
-    // last thing on the page that depends on it.
+    // EXPERIMENT: hotlinked from wearecollins.com's Figma case study, same
+    // reasoning as Grain above — swap back before this site goes live.
     images: [
-      "https://framerusercontent.com/images/l7zfXudj0Gcle7M4WBCLsDU5Y.jpg",
-      "https://framerusercontent.com/images/t48AH01F2ws45pm1R7STMBW0mgM.jpg",
-      "https://framerusercontent.com/images/8u7RRRYRgcTox1dPSEespWV2FoI.jpg",
-      "https://framerusercontent.com/images/kYAYwybdRgLVzl2msMuMCcMJFeQ.jpg",
+      "https://cdn.sanity.io/images/fmzd4n68/production/26a90c67fb93ace240776449945ffec7b5fc1216-12500x8333.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/664072573764a684c079c2b0ca7ae54134ca08be-12500x8333.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/a18e1abb64eb81263bb93d8b2465f3e48a863b6d-12500x8333.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/9cffafd141d3ce7d746adaca9162d3e1afbb29dc-12500x8333.jpg?fit=max&auto=format",
     ],
   },
   {
