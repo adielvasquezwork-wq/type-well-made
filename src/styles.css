@@ -266,6 +266,34 @@
   }
 }
 
+/*
+ * A smaller, plainer sibling of `.rail` for picking among a project's shots
+ * inside the lightbox. Same drag-with-momentum handling via `useDragRail`
+ * and the same snap-suspend-while-dragging trick, but scoped to the modal's
+ * own width rather than the page's — it has no need for `.rail`'s
+ * bleed-past-the-edge inset math, since with three or four thumbnails it
+ * usually doesn't even overflow.
+ */
+@utility thumb-rail {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &[data-dragging="true"] {
+    scroll-snap-type: none;
+  }
+
+  & > * {
+    scroll-snap-align: start;
+  }
+}
+
 /* ── Type ──────────────────────────────────────────────────────────────── */
 
 /*
