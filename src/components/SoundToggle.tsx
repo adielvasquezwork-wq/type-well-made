@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Opt-in ambient sound. Off by default, no autoplay.
- * Everything is synthesised with WebAudio — no audio assets, no playful tones.
+ * Ambient sound, on by default and kept deliberately quiet — a texture
+ * you'd have to be listening for, not a jingle. Everything is synthesised
+ * with WebAudio, no audio assets.
+ *
+ * Browsers won't let a page make sound before the visitor has done anything
+ * on it, default-on or not, so this isn't truly autoplay: an effect below
+ * arms a one-time listener for the visitor's first click or keypress
+ * anywhere on the page and starts the hum then, whatever they actually
+ * clicked. The toggle itself is unaffected — it already starts and stops
+ * audio from its own click, which counts as the gesture on its own.
  */
 export function SoundToggle() {
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(true);
+  const onRef = useRef(on);
   const ctxRef = useRef<AudioContext | null>(null);
   const masterRef = useRef<GainNode | null>(null);
   const stopRef = useRef<(() => void) | null>(null);
@@ -45,7 +54,7 @@ export function SoundToggle() {
       osc.frequency.value = freq;
       osc.detune.value = i * 3 - 1.5 + drift;
       const g = ctx.createGain();
-      g.gain.value = i === 0 ? 0.08 : 0.05;
+      g.gain.value = i === 0 ? 0.055 : 0.035;
       osc.connect(g).connect(filter);
       osc.start();
       return { osc, g };
@@ -60,7 +69,7 @@ export function SoundToggle() {
 
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 1.6);
+    master.gain.linearRampToValueAtTime(0.035, ctx.currentTime + 1.6);
 
     stopRef.current = () => {
       const t = ctx.currentTime;
@@ -85,6 +94,28 @@ export function SoundToggle() {
       setOn(true);
     }
   };
+
+  useEffect(() => {
+    onRef.current = on;
+  }, [on]);
+
+  // Defaulted on, but nothing has actually made a sound yet — the toggle's
+  // own click already counts as a gesture, so this only has to cover a
+  // visitor whose first touch on the page is anywhere else.
+  useEffect(() => {
+    let started = false;
+    const start = () => {
+      if (started || !onRef.current) return;
+      started = true;
+      startAmbient();
+    };
+    document.addEventListener("pointerdown", start, { once: true });
+    document.addEventListener("keydown", start, { once: true });
+    return () => {
+      document.removeEventListener("pointerdown", start);
+      document.removeEventListener("keydown", start);
+    };
+  }, [startAmbient]);
 
   // Considered interaction sound: a short, filtered tick on hover, a blockier
   // knock on click. Both are scoped to `a[href]` and real buttons only — an
@@ -117,7 +148,7 @@ export function SoundToggle() {
       filter.frequency.value = 2200;
       filter.Q.value = 0.4;
 
-      const peak = 0.028 + Math.random() * 0.012;
+      const peak = 0.017 + Math.random() * 0.008;
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(peak, t + 0.018);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
@@ -148,7 +179,7 @@ export function SoundToggle() {
       filter.Q.value = 0.6;
 
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.055, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.036, t + 0.004);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
 
       osc.connect(filter).connect(g).connect(master.context.destination);
