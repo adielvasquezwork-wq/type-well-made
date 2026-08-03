@@ -1,4 +1,11 @@
 /**
+ * SUPERSEDED: project content now comes from Sanity (see
+ * `src/lib/sanity.server.ts` and the `/studio` folder) — nothing in the app
+ * calls `imagesForProject` anymore. Left in place, along with the photos
+ * under `src/work-images/`, only so nothing gets deleted before those
+ * photos are re-uploaded into the new Studio. Safe to delete both once
+ * that's done.
+ *
  * Turns a folder of photos into a project's image list — no code edit needed
  * to add, remove, or reorder pictures.
  *

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import { LocalTime } from "@/components/LocalTime";
@@ -9,9 +10,13 @@ import { Nav } from "@/components/Nav";
 import { Mark } from "@/components/Mark";
 import { ProjectRow, type Work } from "@/components/ProjectRow";
 import { Asterisk } from "@/components/icons";
-import { imagesForProject } from "@/lib/work-images";
+import { fetchWork } from "@/lib/sanity.server";
+
+/** Runs only on the server, so the Sanity project needs no CORS setup. */
+const getWork = createServerFn({ method: "GET" }).handler(() => fetchWork());
 
 export const Route = createFileRoute("/")({
+  loader: () => getWork(),
   head: () => ({
     meta: [
       { title: "Adiel Vásquez — Independent Brand & Web Designer" },
@@ -32,36 +37,6 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * The three projects the page shows. Each one becomes a rail: the first three
- * images are what you scroll, and the whole array is what the gallery opens.
- * Adding a fourth project is adding a fourth entry — the section reads the
- * length of this list and nothing else.
- *
- * Photos come from `src/work-images/<slug>/` — see that folder's README for
- * how to add, remove, or reorder them without touching this file. Opus and
- * Serveo currently hold placeholder photos (borrowed from other studios'
- * public case studies) until their real project photos are dropped in.
- */
-const work: Work[] = [
-  {
-    title: "Grain",
-    blurb: "A generative identity that draws its own patterns, one seed at a time.",
-    images: imagesForProject("grain"),
-  },
-  {
-    title: "Serveo",
-    blurb: "Naming, identity and website for a service platform starting from zero.",
-    images: imagesForProject("serveo"),
-  },
-  {
-    title: "Opus",
-    blurb: "Identity, site and motion system for a research studio that ships in public.",
-    images: imagesForProject("opus"),
-    pending: "Shipping 2026",
-  },
-];
-
-/**
  * Writing. Empty until there is some — a section that says so reads better
  * than three invented posts, and the empty state costs one array entry to
  * replace. Give an entry an `href` once a post has somewhere to live.
@@ -80,6 +55,9 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 function Home() {
+  // Cast: the loader always resolves to Work[] (see getWork above), but the
+  // router's generic inference doesn't carry that through on this route.
+  const work = Route.useLoaderData() as Work[];
   const [gallery, setGallery] = useState<Work | null>(null);
 
   return (
