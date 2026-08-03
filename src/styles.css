@@ -5,9 +5,15 @@
 /*
  * Design system — light only.
  *
- * A warm off-white ground with white cards floating on it, near-black ink,
- * and a display serif doing all of the shouting so nothing else has to.
- * Two families total: Instrument Serif for display, Geist for everything else.
+ * A warm off-white ground with white cards floating on it, near-black ink, and
+ * a strict split of jobs between three faces:
+ *
+ *   Geist            everything you actually read
+ *   Geist Mono       every label, chip, year and caption title — set in caps
+ *   Instrument Serif italic emphasis inside prose, and one closing line
+ *
+ * The mono is what gives the page its voice. It appears only at label size, in
+ * caps, so it never competes with prose — it just marks the joints.
  *
  * Colour values are OKLCH. Every text pair here was measured against its own
  * background and clears WCAG AA (4.5:1) at the size it is actually used.
@@ -22,6 +28,8 @@
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-accent: var(--accent);
+  --color-chip: var(--chip);
+  --color-chip-ink: var(--chip-ink);
 
   /* Mapped so the unused src/components/ui/* scaffold still compiles. */
   --color-card: var(--card);
@@ -42,6 +50,7 @@
   --shadow-card: var(--elevation-card);
   --shadow-lift: var(--elevation-lift);
   --shadow-panel: var(--elevation-panel);
+  --shadow-chip: var(--elevation-chip);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -49,16 +58,21 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
 
   /*
-   * Three radii, and they are concentric by construction: the gallery panel
-   * is 20px with 12px of padding, so anything inset in it is 8px (20 − 12).
-   * Project cards carry their image edge-to-edge, so image and card share 14px.
+   * Four radii, and every nesting in the page is concentric by construction:
+   *
+   *   project card   20px outer, 8px of padding  → 12px cover  (20 − 8)
+   *   gallery panel  20px outer, 12px of padding →  8px image  (20 − 12)
+   *   nav chip       7px, nothing nested inside it
    */
-  --radius-card: 14px;
+  --radius-card: 20px;
+  --radius-image: 12px;
   --radius-panel: 20px;
   --radius-inset: 8px;
+  --radius-chip: 7px;
 
   /*
    * Two curves and nothing else. `soft` is the enter/exit curve for anything
@@ -79,16 +93,31 @@
   --surface: oklch(1 0 0);
   --foreground: oklch(0.205 0.005 60);
   --prose: oklch(0.442 0.006 62);
-  --muted-foreground: oklch(0.535 0.006 62);
+  /*
+   * Held at 0.52 rather than the 0.535 the old layout used. Almost every
+   * marker on this page is now 11px mono caps, and small caps need headroom
+   * over the 4.5:1 floor rather than a value that just clears it — this
+   * measures ~5.1:1 on the page ground.
+   */
+  --muted-foreground: oklch(0.52 0.006 62);
   --border: oklch(0.905 0.004 85);
   --hairline: oklch(0.936 0.003 85);
   --accent: oklch(0.52 0.13 40);
 
   /*
+   * The chip pair carries 11px caps, so it is held well clear of the 4.5:1
+   * floor rather than sitting on it — 0.42 on 0.928 measures ~6.7:1.
+   */
+  --chip: oklch(0.928 0.004 85);
+  --chip-ink: oklch(0.42 0.006 62);
+
+  /*
    * Elevation is shadow, never a border. Two layers each: a tight contact
    * shadow that keeps the card attached to the page, and a wide soft one
-   * that lifts it off.
+   * that lifts it off. Chips get a hairline as an inset shadow so their
+   * edge can animate with the rest of the surface in one property.
    */
+  --elevation-chip: inset 0 0 0 1px oklch(0 0 0 / 0.05), 0 1px 1.5px oklch(0 0 0 / 0.04);
   --elevation-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.1);
   --elevation-lift: 0 2px 6px oklch(0 0 0 / 0.05), 0 22px 48px -22px oklch(0 0 0 / 0.18);
   --elevation-panel: 0 8px 24px -8px oklch(0 0 0 / 0.12), 0 40px 80px -32px oklch(0 0 0 / 0.28);
@@ -121,6 +150,8 @@
     text-rendering: optimizeLegibility;
     hanging-punctuation: first last;
     scroll-behavior: smooth;
+    /* The playground strip runs past both edges on purpose. */
+    overflow-x: clip;
   }
 
   body {
@@ -131,6 +162,22 @@
     line-height: 1.6;
     font-weight: 400;
     font-feature-settings: "calt";
+    overflow-x: clip;
+  }
+
+  /*
+   * Paper grain. Fixed, so it never repaints while the page scrolls, and low
+   * enough to read as tooth in the stock rather than as noise over the design.
+   */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
   }
 
   p {
@@ -142,6 +189,14 @@
   h3 {
     text-wrap: balance;
     font-weight: 400;
+  }
+
+  /*
+   * Anchor navigation has to clear the fixed chips, or a jumped-to section
+   * lands underneath them.
+   */
+  [id] {
+    scroll-margin-top: 6rem;
   }
 
   ::selection {
@@ -188,15 +243,71 @@
 }
 
 /*
- * Small uppercase label. The only place caps appear, and the reason section
- * headings never need to compete with the display type.
+ * One word of serif italic inside a sans paragraph. The size is nudged up
+ * because Instrument Serif runs small on the same em as Geist, so matching
+ * numbers would leave the emphasised word looking shrunken rather than
+ * emphasised.
+ */
+@utility stress {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.08em;
+  letter-spacing: 0.005em;
+}
+
+/*
+ * The mono micro-label — every caption title, year, chip and section marker
+ * on the page. Mono already carries generous sidebearings, so caps need less
+ * added tracking here than they would in the sans.
  */
 @utility label {
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   line-height: 1;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Nav and utility chip — a keycap rather than a pill, which is what keeps a
+ * row of four from reading as a set of tags. Structure comes from an inset
+ * hairline so the edge, fill and lift all animate as one property.
+ */
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-chip);
+  padding: 0.4375rem 0.625rem 0.375rem;
+  background-color: var(--color-chip);
+  color: var(--color-chip-ink);
+  box-shadow: var(--elevation-chip);
+  white-space: nowrap;
+  transition:
+    box-shadow 200ms var(--ease-strong),
+    background-color 200ms var(--ease-strong),
+    color 200ms var(--ease-strong),
+    transform 160ms var(--ease-strong);
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--color-chip) 55%, var(--color-surface));
+    color: var(--color-foreground);
+    box-shadow:
+      inset 0 0 0 1px oklch(0 0 0 / 0.09),
+      0 2px 4px oklch(0 0 0 / 0.05);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  /* The one filled state: the section you are currently reading. */
+  &[data-current="true"] {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.9);
+  }
 }
 
 /* Inline prose link: underline from the font's own metrics, colour on hover. */
@@ -217,10 +328,31 @@
 /* ── Motion ────────────────────────────────────────────────────────────── */
 
 /*
- * Staged entrance for the masthead. A keyframe rather than a transition
- * because it runs once, on load, in sequence — the line rides up from behind
- * its own mask. The mask gets a little vertical slack so descenders aren't
- * clipped as the line settles.
+ * Staged entrance for the intro. A keyframe rather than a transition because
+ * it runs once, on load, in sequence. The travel is small — this masthead is
+ * set at label and prose sizes, so a long rise would read as a page that
+ * hasn't finished loading rather than as a page arriving.
+ */
+@utility rise-in {
+  animation: rise 700ms var(--ease-soft) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * The 404 and error screens still open on a full-width serif line, and that
+ * one wants the heavier treatment: the line rides up from behind its own
+ * mask, with a little vertical slack so descenders aren't clipped.
  */
 @utility line-mask {
   display: block;
@@ -266,6 +398,52 @@
   .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+
+/*
+ * The playground deck. Cards sit at fixed angles and overlap; pointing at one
+ * straightens and lifts it while the rest fall back, so the deck behaves like
+ * a spread of prints on a desk rather than a carousel. Everything here is
+ * behind `hover: hover` — on touch the deck is simply a static composition.
+ */
+@utility card-deck {
+  /*
+   * The resting angle and stacking order arrive as custom properties rather
+   * than as inline `transform` and `z-index`, because an inline declaration
+   * would outrank the hover rule below and the card could never straighten.
+   */
+  & > * {
+    position: relative;
+    z-index: var(--z, 0);
+    transform: rotate(var(--rot, 0deg)) translateY(var(--dy, 0));
+    transition:
+      opacity 300ms var(--ease-strong),
+      filter 300ms var(--ease-strong),
+      transform 450ms var(--ease-soft),
+      box-shadow 450ms var(--ease-soft);
+  }
+
+  /*
+   * The unhovered cards drain rather than fade. Dropping their opacity far
+   * enough to read as secondary would also make them translucent, and eight
+   * overlapping translucent cards turn into a pile of ghosts — you'd see the
+   * page through the deck. Pulling the saturation out instead keeps every
+   * card opaque and still hands all the colour to the one being pointed at.
+   */
+  @media (hover: hover) {
+    &:hover > * {
+      opacity: 0.88;
+      filter: saturate(0.28);
+    }
+
+    & > *:hover {
+      opacity: 1;
+      filter: none;
+      z-index: 20;
+      transform: translateY(-14px) scale(1.04);
+      box-shadow: var(--elevation-lift);
+    }
   }
 }
 
