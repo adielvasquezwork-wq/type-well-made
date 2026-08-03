@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 const sections = [
   { id: "work", label: "Work" },
   { id: "about", label: "About" },
+  { id: "thoughts", label: "Thoughts" },
   { id: "playground", label: "Playground" },
-  { id: "archive", label: "Archive" },
 ] as const;
 
 /**
@@ -61,7 +61,7 @@ export function Nav() {
 
       <nav
         aria-label="Sections"
-        className="relative mx-auto flex w-full max-w-[76rem] items-center justify-between gap-4 px-5 py-5 sm:px-10 lg:px-14"
+        className="page relative flex items-center justify-between gap-4 py-5"
       >
         <ul className="flex items-center gap-1.5">
           {sections.map((section, i) => (

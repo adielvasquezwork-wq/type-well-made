@@ -5,18 +5,18 @@
 /*
  * Design system — light only.
  *
- * A warm off-white ground with white cards floating on it, near-black ink, and
- * a strict split of jobs between three faces:
+ * Near-white paper, white cards, near-black ink, and no colour of its own.
+ * Every bit of colour on the page comes out of the work itself, which is the
+ * whole reason the page is this quiet.
  *
- *   Geist            everything you actually read
- *   Geist Mono       every label, chip, year and caption title — set in caps
- *   Instrument Serif italic emphasis inside prose, and one closing line
+ * Three faces, one job each:
  *
- * The mono is what gives the page its voice. It appears only at label size, in
- * caps, so it never competes with prose — it just marks the joints.
+ *   Geist            everything you read, plus project names in caps
+ *   Geist Mono       chips and section markers only, at 11px, in caps
+ *   Instrument Serif italic emphasis inside a sentence, and nothing else
  *
- * Colour values are OKLCH. Every text pair here was measured against its own
- * background and clears WCAG AA (4.5:1) at the size it is actually used.
+ * Colour values are OKLCH. Every text pair was measured against its own
+ * background and clears WCAG AA at the size it is actually used.
  */
 
 @theme inline {
@@ -27,7 +27,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-hairline: var(--hairline);
-  --color-accent: var(--accent);
+  --color-placeholder: var(--placeholder);
   --color-chip: var(--chip);
   --color-chip-ink: var(--chip-ink);
 
@@ -41,6 +41,7 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
+  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -50,7 +51,6 @@
   --shadow-card: var(--elevation-card);
   --shadow-lift: var(--elevation-lift);
   --shadow-panel: var(--elevation-panel);
-  --shadow-chip: var(--elevation-chip);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -61,15 +61,7 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
 
-  /*
-   * Four radii, and every nesting in the page is concentric by construction:
-   *
-   *   project card   20px outer, 8px of padding  → 12px cover  (20 − 8)
-   *   gallery panel  20px outer, 12px of padding →  8px image  (20 − 12)
-   *   nav chip       7px, nothing nested inside it
-   */
-  --radius-card: 20px;
-  --radius-image: 12px;
+  --radius-frame: 14px;
   --radius-panel: 20px;
   --radius-inset: 8px;
   --radius-chip: 7px;
@@ -82,44 +74,38 @@
   --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/*
- * shadcn's token names are kept so the unused src/components/ui/* scaffold
- * still compiles. Nothing on the page reads them.
- */
 :root {
   color-scheme: light;
 
-  --background: oklch(0.968 0.003 85);
+  --background: oklch(0.981 0.001 90);
   --surface: oklch(1 0 0);
-  --foreground: oklch(0.205 0.005 60);
-  --prose: oklch(0.442 0.006 62);
-  /*
-   * Held at 0.52 rather than the 0.535 the old layout used. Almost every
-   * marker on this page is now 11px mono caps, and small caps need headroom
-   * over the 4.5:1 floor rather than a value that just clears it — this
-   * measures ~5.1:1 on the page ground.
-   */
-  --muted-foreground: oklch(0.52 0.006 62);
-  --border: oklch(0.905 0.004 85);
-  --hairline: oklch(0.936 0.003 85);
-  --accent: oklch(0.52 0.13 40);
+  --foreground: oklch(0.19 0.003 60);
+  --prose: oklch(0.44 0.004 62);
+  --muted-foreground: oklch(0.52 0.004 62);
+  --border: oklch(0.915 0.002 90);
+  --hairline: oklch(0.945 0.001 90);
+  /* The empty frame. A neutral grey, never a tinted one. */
+  --placeholder: oklch(0.925 0.001 90);
+
+  --chip: oklch(0.938 0.002 90);
+  --chip-ink: oklch(0.42 0.004 62);
 
   /*
-   * The chip pair carries 11px caps, so it is held well clear of the 4.5:1
-   * floor rather than sitting on it — 0.42 on 0.928 measures ~6.7:1.
+   * The page is a single measured width, and several things that sit outside
+   * the container still have to line up with its left edge — the project
+   * rails, above all. Keeping the gutter in a variable is what lets them.
    */
-  --chip: oklch(0.928 0.004 85);
-  --chip-ink: oklch(0.42 0.006 62);
+  --page-max: 76rem;
+  --page-pad: 1.25rem;
 
   /*
    * Elevation is shadow, never a border. Two layers each: a tight contact
-   * shadow that keeps the card attached to the page, and a wide soft one
-   * that lifts it off. Chips get a hairline as an inset shadow so their
-   * edge can animate with the rest of the surface in one property.
+   * shadow that keeps a card attached to the page, and a wide soft one that
+   * lifts it off. Both are quieter than they were — on near-white paper a
+   * heavy shadow is the fastest way to make a clean layout look cheap.
    */
-  --elevation-chip: inset 0 0 0 1px oklch(0 0 0 / 0.05), 0 1px 1.5px oklch(0 0 0 / 0.04);
-  --elevation-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.1);
-  --elevation-lift: 0 2px 6px oklch(0 0 0 / 0.05), 0 22px 48px -22px oklch(0 0 0 / 0.18);
+  --elevation-card: 0 1px 2px oklch(0 0 0 / 0.03), 0 6px 18px -10px oklch(0 0 0 / 0.08);
+  --elevation-lift: 0 2px 5px oklch(0 0 0 / 0.04), 0 18px 40px -20px oklch(0 0 0 / 0.14);
   --elevation-panel: 0 8px 24px -8px oklch(0 0 0 / 0.12), 0 40px 80px -32px oklch(0 0 0 / 0.28);
 
   --radius: 0.25rem;
@@ -129,14 +115,27 @@
   --popover-foreground: var(--foreground);
   --primary: var(--foreground);
   --primary-foreground: var(--background);
-  --secondary: oklch(0.94 0.004 85);
+  --secondary: oklch(0.945 0.001 90);
   --secondary-foreground: var(--foreground);
   --muted: var(--secondary);
+  --accent: oklch(0.52 0.13 40);
   --accent-foreground: var(--background);
   --destructive: oklch(0.52 0.17 27);
   --destructive-foreground: var(--background);
   --input: var(--border);
   --ring: var(--foreground);
+}
+
+@media (width >= 40rem) {
+  :root {
+    --page-pad: 2.5rem;
+  }
+}
+
+@media (width >= 64rem) {
+  :root {
+    --page-pad: 3.5rem;
+  }
 }
 
 @layer base {
@@ -150,7 +149,7 @@
     text-rendering: optimizeLegibility;
     hanging-punctuation: first last;
     scroll-behavior: smooth;
-    /* The playground strip runs past both edges on purpose. */
+    /* The rails and the playground run past the right edge on purpose. */
     overflow-x: clip;
   }
 
@@ -158,26 +157,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-size: 1.0625rem;
+    font-size: 1rem;
     line-height: 1.6;
     font-weight: 400;
     font-feature-settings: "calt";
     overflow-x: clip;
-  }
-
-  /*
-   * Paper grain. Fixed, so it never repaints while the page scrolls, and low
-   * enough to read as tooth in the stock rather than as noise over the design.
-   */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
-    background-size: 160px 160px;
   }
 
   p {
@@ -191,16 +175,13 @@
     font-weight: 400;
   }
 
-  /*
-   * Anchor navigation has to clear the fixed chips, or a jumped-to section
-   * lands underneath them.
-   */
+  /* Anchor navigation has to clear the fixed chips. */
   [id] {
     scroll-margin-top: 6rem;
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-accent) 18%, transparent);
+    background-color: oklch(0 0 0 / 0.09);
   }
 
   :focus-visible {
@@ -229,24 +210,60 @@
   }
 }
 
-/* ── Type ──────────────────────────────────────────────────────────────── */
+/* ── Layout ────────────────────────────────────────────────────────────── */
 
-/*
- * The display face. Instrument Serif ships at a single weight, which is the
- * point: hierarchy comes from size and space, never from a heavier cut.
- */
-@utility display {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  line-height: 0.94;
-  letter-spacing: -0.02em;
+/* The one measured column everything on the page is aligned to. */
+@utility page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--page-max);
+  padding-inline: var(--page-pad);
 }
 
 /*
- * One word of serif italic inside a sans paragraph. The size is nudged up
- * because Instrument Serif runs small on the same em as Geist, so matching
- * numbers would leave the emphasised word looking shrunken rather than
- * emphasised.
+ * A project's images, as a horizontal rail.
+ *
+ * It starts flush with the page's left edge and runs off the right one, so
+ * the next image is always half-visible — that peek is the whole affordance,
+ * and it is why the rail carries no arrows or dots at rest.
+ *
+ * The start inset is derived rather than hard-coded: `100%` resolves against
+ * the rail's own full-width parent, so it tracks the real gutter at every
+ * width, including the extra margin once the viewport passes the page's
+ * maximum. `scroll-padding` repeats it so a snapped image lands on that same
+ * line instead of against the viewport edge.
+ */
+@utility rail {
+  --inset: max(var(--page-pad), calc((100% - var(--page-max)) / 2 + var(--page-pad)));
+
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-inline: var(--inset) var(--page-pad);
+  scroll-padding-inline-start: var(--inset);
+
+  /* The peek is the scroll cue. A bar underneath would only repeat it. */
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* ── Type ──────────────────────────────────────────────────────────────── */
+
+/*
+ * One word of serif italic inside a sans sentence — the only place the serif
+ * appears. The size is nudged up because Instrument Serif runs small on the
+ * same em as Geist, so matching numbers would leave the emphasised word
+ * looking shrunken rather than emphasised.
  */
 @utility stress {
   font-family: var(--font-serif);
@@ -256,9 +273,9 @@
 }
 
 /*
- * The mono micro-label — every caption title, year, chip and section marker
- * on the page. Mono already carries generous sidebearings, so caps need less
- * added tracking here than they would in the sans.
+ * The mono micro-label — chips and section markers, and nothing else. Mono
+ * carries generous sidebearings already, so caps need less added tracking
+ * here than they would in the sans.
  */
 @utility label {
   font-family: var(--font-mono);
@@ -267,6 +284,18 @@
   letter-spacing: 0.09em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * A project's name. Sans rather than mono, and heavier: it is a title, not a
+ * marker, and it has to lead the description sitting underneath it.
+ */
+@utility caps {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 /*
@@ -282,7 +311,7 @@
   padding: 0.4375rem 0.625rem 0.375rem;
   background-color: var(--color-chip);
   color: var(--color-chip-ink);
-  box-shadow: var(--elevation-chip);
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.04);
   white-space: nowrap;
   transition:
     box-shadow 200ms var(--ease-strong),
@@ -291,11 +320,9 @@
     transform 160ms var(--ease-strong);
 
   &:hover {
-    background-color: color-mix(in oklab, var(--color-chip) 55%, var(--color-surface));
+    background-color: color-mix(in oklab, var(--color-chip) 45%, var(--color-surface));
     color: var(--color-foreground);
-    box-shadow:
-      inset 0 0 0 1px oklch(0 0 0 / 0.09),
-      0 2px 4px oklch(0 0 0 / 0.05);
+    box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.08);
   }
 
   &:active {
@@ -306,7 +333,7 @@
   &[data-current="true"] {
     background-color: var(--color-foreground);
     color: var(--color-background);
-    box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.9);
+    box-shadow: none;
   }
 }
 
@@ -314,7 +341,7 @@
 @utility link {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, currentColor 32%, transparent);
+  text-decoration-color: color-mix(in oklab, currentColor 30%, transparent);
   text-decoration-thickness: from-font;
   text-underline-offset: 0.2em;
   text-decoration-skip-ink: auto;
@@ -328,9 +355,9 @@
 /* ── Motion ────────────────────────────────────────────────────────────── */
 
 /*
- * Staged entrance for the intro. A keyframe rather than a transition because
- * it runs once, on load, in sequence. The travel is small — this masthead is
- * set at label and prose sizes, so a long rise would read as a page that
+ * Staged entrance for the introduction. A keyframe rather than a transition
+ * because it runs once, on load, in sequence. The travel is small: this
+ * masthead is set at reading sizes, so a long rise would read as a page that
  * hasn't finished loading rather than as a page arriving.
  */
 @utility rise-in {
@@ -350,42 +377,15 @@
 }
 
 /*
- * The 404 and error screens still open on a full-width serif line, and that
- * one wants the heavier treatment: the line rides up from behind its own
- * mask, with a little vertical slack so descenders aren't clipped.
- */
-@utility line-mask {
-  display: block;
-  overflow: hidden;
-  padding-block-end: 0.14em;
-  margin-block-end: -0.14em;
-}
-
-@utility line-in {
-  display: block;
-  animation: line-up 1s var(--ease-soft) both;
-  animation-delay: calc(var(--i, 0) * 90ms);
-}
-
-@keyframes line-up {
-  from {
-    transform: translateY(105%);
-  }
-  to {
-    transform: none;
-  }
-}
-
-/*
  * Scroll reveal. A transition rather than a keyframe so it stays interruptible
  * if the reader scrolls back before it finishes. `Reveal` flips data-shown.
  */
 @utility reveal {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(16px);
   transition:
-    opacity 800ms var(--ease-soft),
-    transform 800ms var(--ease-soft);
+    opacity 700ms var(--ease-soft),
+    transform 700ms var(--ease-soft);
 
   &[data-shown="true"] {
     opacity: 1;
@@ -402,17 +402,13 @@
 }
 
 /*
- * The playground deck. Cards sit at fixed angles and overlap; pointing at one
- * straightens and lifts it while the rest fall back, so the deck behaves like
- * a spread of prints on a desk rather than a carousel. Everything here is
- * behind `hover: hover` — on touch the deck is simply a static composition.
+ * The playground spread. Pieces sit at small fixed angles and overlap the way
+ * a stack of printed work does when you push it apart on a desk. Pointing at
+ * one straightens and lifts it; the rest drain of colour rather than fading,
+ * because dropping opacity far enough to read as secondary would also make
+ * them translucent and you would see the page through the pile.
  */
-@utility card-deck {
-  /*
-   * The resting angle and stacking order arrive as custom properties rather
-   * than as inline `transform` and `z-index`, because an inline declaration
-   * would outrank the hover rule below and the card could never straighten.
-   */
+@utility spread {
   & > * {
     position: relative;
     z-index: var(--z, 0);
@@ -424,24 +420,17 @@
       box-shadow 450ms var(--ease-soft);
   }
 
-  /*
-   * The unhovered cards drain rather than fade. Dropping their opacity far
-   * enough to read as secondary would also make them translucent, and eight
-   * overlapping translucent cards turn into a pile of ghosts — you'd see the
-   * page through the deck. Pulling the saturation out instead keeps every
-   * card opaque and still hands all the colour to the one being pointed at.
-   */
   @media (hover: hover) {
     &:hover > * {
-      opacity: 0.88;
-      filter: saturate(0.28);
+      opacity: 0.9;
+      filter: saturate(0.3);
     }
 
     & > *:hover {
       opacity: 1;
       filter: none;
       z-index: 20;
-      transform: translateY(-14px) scale(1.04);
+      transform: translateY(-12px) scale(1.03);
       box-shadow: var(--elevation-lift);
     }
   }
@@ -452,6 +441,6 @@
  * neutral, which would pick up the paper underneath and read as a dirty edge.
  */
 @utility image-edge {
-  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline: 1px solid oklch(0 0 0 / 0.08);
   outline-offset: -1px;
 }

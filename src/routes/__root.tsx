@@ -12,17 +12,15 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-/** Sets the entrance delay slot for a masthead line, same as the index route. */
+/** Sets the entrance delay slot for a line, same as the index route. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
 /** Shared shell for the two dead ends, so they read like the rest of the site. */
 function Message({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[76rem] flex-col justify-center px-6 pb-24 sm:px-10 lg:px-14">
-      <p className="line-mask label text-muted-foreground">
-        <span className="line-in inline-block" style={at(0)}>
-          {label}
-        </span>
+    <main className="page flex min-h-screen flex-col justify-center pb-24">
+      <p className="label rise-in text-muted-foreground" style={at(0)}>
+        {label}
       </p>
       {children}
     </main>
@@ -32,17 +30,16 @@ function Message({ label, children }: { label: string; children: ReactNode }) {
 function NotFoundComponent() {
   return (
     <Message label="404">
-      <h1 className="display mt-7 text-[clamp(2.5rem,8vw,5.5rem)]">
-        <span className="line-mask">
-          <span className="line-in" style={at(1)}>
-            This page doesn’t exist.
-          </span>
-        </span>
+      <h1
+        className="rise-in mt-6 max-w-[18ch] text-[clamp(1.75rem,5vw,3rem)] leading-[1.12] font-medium tracking-[-0.02em]"
+        style={at(1)}
+      >
+        This page doesn’t exist.
       </h1>
-      <p className="mt-6 max-w-[46ch] text-prose">
+      <p className="rise-in mt-5 max-w-[46ch] text-[0.9375rem] text-prose" style={at(2)}>
         It may have moved, or the link that brought you here was already wrong.
       </p>
-      <p className="mt-10">
+      <p className="rise-in mt-8 text-[0.9375rem]" style={at(3)}>
         <Link className="link" to="/">
           Back to the index
         </Link>
@@ -60,17 +57,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <Message label="Error">
-      <h1 className="display mt-7 text-[clamp(2.5rem,8vw,5.5rem)]">
-        <span className="line-mask">
-          <span className="line-in" style={at(1)}>
-            This page didn’t load.
-          </span>
-        </span>
+      <h1
+        className="rise-in mt-6 max-w-[18ch] text-[clamp(1.75rem,5vw,3rem)] leading-[1.12] font-medium tracking-[-0.02em]"
+        style={at(1)}
+      >
+        This page didn’t load.
       </h1>
-      <p className="mt-6 max-w-[46ch] text-prose">
+      <p className="rise-in mt-5 max-w-[46ch] text-[0.9375rem] text-prose" style={at(2)}>
         Something broke on the way here. Trying again usually settles it.
       </p>
-      <p className="mt-10">
+      <p className="rise-in mt-8 text-[0.9375rem]" style={at(3)}>
         <button
           type="button"
           className="link"
@@ -106,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // The site is light-only, so the browser chrome matches the paper
       // regardless of what the reader's system prefers.
       { name: "color-scheme", content: "light" },
-      { name: "theme-color", content: "#f5f4f2" },
+      { name: "theme-color", content: "#fafafa" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Adiel Vásquez — Independent Brand & Web Designer" },
@@ -121,16 +117,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Adiel Vásquez is an independent designer working with startups and studios on brands and websites with a clear point of view.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/41cfb7ed-2263-49fc-b997-574a6ae9879d/id-preview-dea99bfb--2fe74f76-b49a-4076-80b3-6e925fcac0dc.lovable.app-1785170384097.png",
-      },
+      // No og:image yet. The one that used to live here was a screenshot of
+      // the previous site, and a share card showing the wrong design is worse
+      // than none — a link with no image degrades to a plain card, a link with
+      // a stale one advertises work that isn't on the page any more.
     ],
     links: [
       {

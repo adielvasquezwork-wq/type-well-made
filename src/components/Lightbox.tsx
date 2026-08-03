@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpRight, Close } from "@/components/icons";
+import { Close } from "@/components/icons";
 
 export type Gallery = {
   title: string;
-  meta: string;
-  year: string;
-  href?: string;
+  blurb: string;
   images: string[];
 };
 
@@ -118,9 +116,9 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
           <div className="overflow-hidden rounded-panel bg-surface shadow-panel">
             <header className="flex items-start justify-between gap-6 border-b border-hairline px-6 py-5 sm:px-8">
               <div>
-                <h2 className="display text-3xl sm:text-4xl">{gallery.title}</h2>
-                <p className="label mt-2.5 text-muted-foreground">
-                  {gallery.meta} — {gallery.year}
+                <h2 className="caps">{gallery.title}</h2>
+                <p className="mt-2 max-w-[42ch] text-[0.875rem] leading-[1.45] text-prose">
+                  {gallery.blurb}
                 </p>
               </div>
 
@@ -148,20 +146,6 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
                 />
               ))}
             </div>
-
-            {gallery.href ? (
-              <footer className="border-t border-hairline px-6 py-5 sm:px-8">
-                <a
-                  href={gallery.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group inline-flex items-center gap-2 text-[0.9375rem] transition-transform duration-200 ease-strong active:scale-[0.96]"
-                >
-                  <span className="link">Visit the case study</span>
-                  <ArrowUpRight className="size-4 transition-transform duration-300 ease-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </a>
-              </footer>
-            ) : null}
           </div>
         </div>
       </div>
