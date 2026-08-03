@@ -9,6 +9,7 @@ import { Nav } from "@/components/Nav";
 import { Mark } from "@/components/Mark";
 import { ProjectRow, type Work } from "@/components/ProjectRow";
 import { Asterisk } from "@/components/icons";
+import { imagesForProject } from "@/lib/work-images";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,44 +36,28 @@ export const Route = createFileRoute("/")({
  * images are what you scroll, and the whole array is what the gallery opens.
  * Adding a fourth project is adding a fourth entry — the section reads the
  * length of this list and nothing else.
+ *
+ * Photos come from `src/work-images/<slug>/` — see that folder's README for
+ * how to add, remove, or reorder them without touching this file. Opus and
+ * Serveo currently hold placeholder photos (borrowed from other studios'
+ * public case studies) until their real project photos are dropped in.
  */
 const work: Work[] = [
   {
     title: "Grain",
     blurb: "A generative identity that draws its own patterns, one seed at a time.",
-    // EXPERIMENT: hotlinked from jkane.co's Vizcom case study to test whether
-    // the page's "sloppiness" is about image treatment rather than layout.
-    // Not the project's real imagery — swap back before this site goes live.
-    images: [
-      "https://cdn.sanity.io/images/6tgemksh/production/0546e1deb8f7f793aa893a3a564bb80891975354-1920x1080.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/6tgemksh/production/4a4b4a59557f5a192114f9bda62d8d0517386d19-1920x1080.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/6tgemksh/production/8630397cf0fae21f4a74f801629d14ec1cd4071c-1920x1080.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/6tgemksh/production/ad14c73f6777da39bef7154b158fcdf32c2616f6-1920x1080.jpg?fit=max&auto=format",
-    ],
+    images: imagesForProject("grain"),
   },
   {
     title: "Serveo",
     blurb: "Naming, identity and website for a service platform starting from zero.",
-    // EXPERIMENT: hotlinked from wearecollins.com's Twitch case study, same
-    // reasoning as Grain above — swap back before this site goes live.
-    images: [
-      "https://cdn.sanity.io/images/fmzd4n68/production/36027835e9d6e86e901d942920990ba1cd5b1f99-3000x2000.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/bf5898e79f353bc12b2703a154263c95b70cb492-3000x2000.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/f9f9fa90d5916df26f00f2d8829f9e7a71343796-2200x1467.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/5a811d8e4af5a6c2c55a3f8aad950fbfbe594516-2200x1467.jpg?fit=max&auto=format",
-    ],
+    images: imagesForProject("serveo"),
   },
   {
     title: "Opus",
     blurb: "Identity, site and motion system for a research studio that ships in public.",
-    // EXPERIMENT: hotlinked from studionari.co.uk's Blueberry project, same
-    // reasoning as Grain and Serveo above — swap back before this site goes live.
-    images: [
-      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/a5eb827d6b-1760710639/nari_bb_06.webp",
-      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/bb7420f730-1760710585/nari_bb_04.webp",
-      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/9286edff79-1760710685/nari_bb_09.webp",
-      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/a201fbeb75-1760710667/nari_bb_07.webp",
-    ],
+    images: imagesForProject("opus"),
+    pending: "Shipping 2026",
   },
 ];
 
