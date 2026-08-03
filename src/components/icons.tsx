@@ -16,28 +16,6 @@ const base = {
   "aria-hidden": true,
 } as const;
 
-/** External link. */
-export function ArrowUpRight({ className = "" }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M5 11 11 5" />
-      <path d="M5.5 5H11v5.5" />
-    </svg>
-  );
-}
-
-/** Opens the gallery. Two opposing corners pulling apart. */
-export function Expand({ className = "" }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M9.5 2.5h4v4" />
-      <path d="M6.5 13.5h-4v-4" />
-      <path d="M13.5 2.5 9.25 6.75" />
-      <path d="M2.5 13.5 6.75 9.25" />
-    </svg>
-  );
-}
-
 /** Closes the gallery. */
 export function Close({ className = "" }: IconProps) {
   return (
@@ -59,15 +37,6 @@ export function Asterisk({ className = "" }: IconProps) {
       <path d="M8 2.75v10.5" />
       <path d="m3.45 5.375 9.1 5.25" />
       <path d="m3.45 10.625 9.1-5.25" />
-    </svg>
-  );
-}
-
-/** Gallery paging, mirrored for the two directions. */
-export function Chevron({ className = "" }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M6.25 3.5 10.75 8l-4.5 4.5" />
     </svg>
   );
 }

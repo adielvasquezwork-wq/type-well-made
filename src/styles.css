@@ -28,6 +28,7 @@
   --color-border: var(--border);
   --color-hairline: var(--hairline);
   --color-placeholder: var(--placeholder);
+  --color-nav-rest: var(--nav-rest);
 
   /* Mapped so the unused src/components/ui/* scaffold still compiles. */
   --color-card: var(--card);
@@ -59,7 +60,7 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
 
-  --radius-frame: 14px;
+  --radius-frame: 12px;
   --radius-panel: 20px;
   --radius-inset: 8px;
 
@@ -83,6 +84,8 @@
   --hairline: oklch(0.945 0.001 90);
   /* The empty frame. A neutral grey, never a tinted one. */
   --placeholder: oklch(0.925 0.001 90);
+  /* The nav's resting fill — a flat, quiet grey a step below the placeholder. */
+  --nav-rest: oklch(0.888 0.003 88);
 
   /*
    * The page is a single measured width, and several things that sit outside
@@ -238,6 +241,18 @@
   padding-inline: var(--inset) var(--page-pad);
   scroll-padding-inline-start: var(--inset);
 
+  /*
+   * While a mouse drag is live, `scroll-snap-type` fights every scrollLeft
+   * write the drag makes — mandatory snapping re-centres on the nearest
+   * frame the instant it's set by hand, so the rail visibly never moves.
+   * The component toggles this attribute on the element itself for exactly
+   * the duration of the drag; snapping comes back on release, and the rail
+   * settles onto the nearest frame the way it would after any other scroll.
+   */
+  &[data-dragging="true"] {
+    scroll-snap-type: none;
+  }
+
   /* The peek is the scroll cue. A bar underneath would only repeat it. */
   scrollbar-width: none;
 
@@ -325,28 +340,20 @@
 }
 
 /*
- * A section link in the nav. No fill, no border, nothing to read as a row of
- * buttons before you've touched any of them — on the page's own paper the
- * backdrop blur below is imperceptible, so at rest this is just words.
- *
- * The blur exists for what the paper isn't: the work underneath is
- * photographic and often saturated, and this nav stays fixed while it scrolls
- * past beneath. A full-width bar behind the whole row would be the fade this
- * page doesn't want; a soft, tightly-fitted halo behind each word is a
- * different thing — it protects legibility without ever reading as a shape of
- * its own. The section you're currently reading is the one exception, and it
- * borrows the same solid pill as `chip` rather than inventing a second filled
- * state.
+ * A section link in the nav — a flat, solid pill at rest rather than ghost
+ * text, so it stays legible over whatever scrolls underneath the fixed
+ * header without needing a blur to do it. Two fills only: a quiet neutral
+ * grey at rest, and the same solid dark pill as `chip` for the section
+ * you're currently reading. The header itself carries no fill of its own —
+ * every bit of surface on the whole bar lives on these pills.
  */
 @utility navlink {
   display: inline-flex;
   align-items: center;
   padding: 0.5rem 0.8125rem;
   border-radius: 999px;
-  color: var(--color-muted-foreground);
-  background-color: color-mix(in oklab, var(--color-background) 35%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  color: var(--color-foreground);
+  background-color: var(--color-nav-rest);
   white-space: nowrap;
   transition:
     color 200ms var(--ease-strong),
@@ -355,7 +362,7 @@
     transform 160ms var(--ease-strong);
 
   &:hover {
-    color: var(--color-foreground);
+    background-color: color-mix(in oklab, var(--color-nav-rest) 65%, var(--color-surface));
   }
 
   &:active {
@@ -430,41 +437,6 @@
   .reveal {
     opacity: 1;
     transform: none;
-  }
-}
-
-/*
- * The playground spread. Pieces sit at small fixed angles and overlap the way
- * a stack of printed work does when you push it apart on a desk. Pointing at
- * one straightens and lifts it; the rest drain of colour rather than fading,
- * because dropping opacity far enough to read as secondary would also make
- * them translucent and you would see the page through the pile.
- */
-@utility spread {
-  & > * {
-    position: relative;
-    z-index: var(--z, 0);
-    transform: rotate(var(--rot, 0deg)) translateY(var(--dy, 0));
-    transition:
-      opacity 300ms var(--ease-strong),
-      filter 300ms var(--ease-strong),
-      transform 450ms var(--ease-soft),
-      box-shadow 450ms var(--ease-soft);
-  }
-
-  @media (hover: hover) {
-    &:hover > * {
-      opacity: 0.9;
-      filter: saturate(0.3);
-    }
-
-    & > *:hover {
-      opacity: 1;
-      filter: none;
-      z-index: 20;
-      transform: translateY(-12px) scale(1.03);
-      box-shadow: var(--elevation-lift);
-    }
   }
 }
 

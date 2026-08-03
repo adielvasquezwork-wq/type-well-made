@@ -8,7 +8,6 @@ import { Lightbox } from "@/components/Lightbox";
 import { Nav } from "@/components/Nav";
 import { Mark } from "@/components/Mark";
 import { ProjectRow, type Work } from "@/components/ProjectRow";
-import { Spread, Ticks } from "@/components/Spread";
 import { Asterisk } from "@/components/icons";
 
 export const Route = createFileRoute("/")({
@@ -76,17 +75,6 @@ const work: Work[] = [
  * replace. Give an entry an `href` once a post has somewhere to live.
  */
 const notes: { title: string; date: string; href?: string }[] = [];
-
-/** Pieces for the playground spread. */
-const pieces = [
-  "/work/grain/grain-1-palette.jpg",
-  "https://framerusercontent.com/images/l7zfXudj0Gcle7M4WBCLsDU5Y.jpg",
-  "/work/grain/grain-2-pattern.jpg",
-  "https://framerusercontent.com/images/t48AH01F2ws45pm1R7STMBW0mgM.jpg",
-  "/work/grain/grain-3-session.jpg",
-  "https://framerusercontent.com/images/8u7RRRYRgcTox1dPSEespWV2FoI.jpg",
-  "/work/grain/grain-4-mark.jpg",
-];
 
 /** Sets the entrance delay slot for an introduction block. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
@@ -165,51 +153,6 @@ function Home() {
           </div>
         </section>
 
-        <section id="about" className="page pb-24 sm:pb-32">
-          <Reveal>
-            <SectionLabel>About</SectionLabel>
-          </Reveal>
-
-          <Reveal>
-            <div className="mt-6 max-w-[58ch] space-y-5 text-[0.9375rem] leading-[1.62] text-prose">
-              <p className="text-[1.0625rem] leading-[1.55] text-foreground">
-                Most days that means naming, identity systems, art direction and the site that
-                carries them — built end to end, by one person, on purpose.
-              </p>
-              <p>
-                Working alone is the point rather than the constraint: the brand and the build are
-                the same decision made twice, and nothing gets lost in the handoff. I keep
-                references on{" "}
-                <a
-                  className="link"
-                  href="https://www.cosmos.so/adiell"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Cosmos
-                </a>{" "}
-                and{" "}
-                <a
-                  className="link"
-                  href="https://savee.com/theadielv_/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Savee
-                </a>
-                , and write the CSS myself.
-              </p>
-              <p>
-                Taking on a small number of projects for 2026 — write to{" "}
-                <a className="link" href="mailto:hello@adiel.design">
-                  hello@adiel.design
-                </a>
-                .
-              </p>
-            </div>
-          </Reveal>
-        </section>
-
         <section id="thoughts" className="page pb-24 sm:pb-32">
           <Reveal>
             <SectionLabel>Thoughts</SectionLabel>
@@ -248,32 +191,6 @@ function Home() {
               </p>
             )}
           </Reveal>
-        </section>
-
-        {/*
-         * The playground runs the full width of the viewport and past both
-         * edges, which is the one place the page breaks its own margin. It
-         * gets no container for exactly that reason.
-         */}
-        <section id="playground" className="pb-24 sm:pb-32">
-          <div className="page">
-            <Reveal>
-              <SectionLabel>Playground</SectionLabel>
-            </Reveal>
-          </div>
-
-          <Reveal className="relative mt-8 sm:mt-12">
-            <Ticks className="pointer-events-none absolute top-1/2 left-3 hidden h-24 -translate-y-1/2 text-foreground/25 sm:block" />
-            <Spread pieces={pieces} />
-          </Reveal>
-
-          <div className="page mt-10 sm:mt-12">
-            <Reveal>
-              <p className="mx-auto max-w-[44ch] text-center text-[0.9375rem] text-muted-foreground">
-                Offcuts, tests and frames that never made it into a case study.
-              </p>
-            </Reveal>
-          </div>
         </section>
 
         <footer className="page pb-16">

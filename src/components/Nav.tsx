@@ -7,26 +7,18 @@ import { useEffect, useState } from "react";
  */
 const sections = [
   { id: "work", label: "Work" },
-  { id: "about", label: "About" },
   { id: "thoughts", label: "Thoughts" },
-  { id: "playground", label: "Playground" },
 ] as const;
 
 /**
  * Fixed navigation.
  *
- * At rest it's just words — no pills, no surface, no bar. The section links
- * sit directly on the page the way a masthead does, and the only fill on the
- * whole row is the one section you're currently reading, which borrows the
- * same solid pill as the Contact button. That's deliberate: a nav that looks
- * like four buttons before you've touched any of them reads as chrome, and
- * this page would rather read as content with a quiet way back to the top.
- *
- * The filled link marks the section you are currently reading — a real
- * state, not a hover echo — so the nav answers "where am I" as well as
- * "where can I go". `Thoughts` and `Playground` step out below `sm`: four
- * links plus Contact overflow a phone, and both sections are a scroll away
- * regardless.
+ * A row of solid pills, not text on a bar — the header itself carries no
+ * fill of its own, so every bit of surface here lives on the pills
+ * themselves. Two fills only: a quiet neutral grey at rest, and a solid dark
+ * pill for the one section you're currently reading, which the Contact link
+ * also borrows. The filled link is a real state, not a hover echo, so the
+ * nav answers "where am I" as well as "where can I go".
  */
 export function Nav() {
   const [current, setCurrent] = useState<string | null>(null);
@@ -58,12 +50,7 @@ export function Nav() {
       <nav aria-label="Sections" className="page flex items-center justify-between gap-4 py-5">
         <ul className="flex items-center gap-1">
           {sections.map((section, i) => (
-            <li
-              key={section.id}
-              // The two that step out on phones are the two furthest down the
-              // page, so the visible pair still matches reading order.
-              className={i >= 2 ? "hidden sm:block" : undefined}
-            >
+            <li key={section.id}>
               <a
                 href={`#${section.id}`}
                 data-current={current === section.id}
