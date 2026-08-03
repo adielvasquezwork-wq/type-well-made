@@ -53,19 +53,26 @@ const work: Work[] = [
   {
     title: "Serveo",
     blurb: "Naming, identity and website for a service platform starting from zero.",
-    // EXPERIMENT: hotlinked from wearecollins.com's Figma case study, same
+    // EXPERIMENT: hotlinked from wearecollins.com's Twitch case study, same
     // reasoning as Grain above — swap back before this site goes live.
     images: [
-      "https://cdn.sanity.io/images/fmzd4n68/production/26a90c67fb93ace240776449945ffec7b5fc1216-12500x8333.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/664072573764a684c079c2b0ca7ae54134ca08be-12500x8333.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/a18e1abb64eb81263bb93d8b2465f3e48a863b6d-12500x8333.jpg?fit=max&auto=format",
-      "https://cdn.sanity.io/images/fmzd4n68/production/9cffafd141d3ce7d746adaca9162d3e1afbb29dc-12500x8333.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/36027835e9d6e86e901d942920990ba1cd5b1f99-3000x2000.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/bf5898e79f353bc12b2703a154263c95b70cb492-3000x2000.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/f9f9fa90d5916df26f00f2d8829f9e7a71343796-2200x1467.jpg?fit=max&auto=format",
+      "https://cdn.sanity.io/images/fmzd4n68/production/5a811d8e4af5a6c2c55a3f8aad950fbfbe594516-2200x1467.jpg?fit=max&auto=format",
     ],
   },
   {
     title: "Opus",
     blurb: "Identity, site and motion system for a research studio that ships in public.",
-    pending: "Shipping 2026",
+    // EXPERIMENT: hotlinked from studionari.co.uk's Blueberry project, same
+    // reasoning as Grain and Serveo above — swap back before this site goes live.
+    images: [
+      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/a5eb827d6b-1760710639/nari_bb_06.webp",
+      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/bb7420f730-1760710585/nari_bb_04.webp",
+      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/9286edff79-1760710685/nari_bb_09.webp",
+      "https://8d802e697ffe53e4163cdf9e7cbe7f56-16499.sites.k-hosting.co.uk/studio-nari/media/pages/projects/blueberry/a201fbeb75-1760710667/nari_bb_07.webp",
+    ],
   },
 ];
 
