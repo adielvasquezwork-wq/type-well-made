@@ -120,18 +120,14 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
       <div className="absolute inset-0 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4 sm:py-4">
         <div
           ref={panelRef}
-          className={`mx-auto w-full max-w-6xl transition-[opacity,transform] duration-[420ms] ease-soft ${
+          className={`mx-auto w-full max-w-[76rem] transition-[opacity,transform] duration-[420ms] ease-soft ${
             open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           } ${closing ? "!translate-y-2 !duration-[240ms]" : ""}`}
         >
-          <div className="px-1 pt-12 pb-6 sm:pt-14 sm:pb-8">
-            <h2 className="label text-background/50">{gallery.title}</h2>
-            <p className="mt-2 max-w-[46ch] text-[0.9375rem] leading-[1.5] text-background/80">
-              {gallery.blurb}
-            </p>
-          </div>
+          <h2 className="sr-only">{gallery.title}</h2>
+          <p className="sr-only">{gallery.blurb}</p>
 
-          <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex flex-col gap-2 sm:gap-3">
             {gallery.images.map((src, i) => (
               <Frame
                 key={src}
@@ -146,6 +142,7 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
           <div className="h-10 sm:h-14" />
         </div>
       </div>
+
     </div>,
     document.body,
   );
