@@ -141,9 +141,8 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
 
           <div className="h-10 sm:h-14" />
         </div>
-
-        </div>
       </div>
+
     </div>,
     document.body,
   );
