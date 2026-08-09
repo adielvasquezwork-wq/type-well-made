@@ -63,6 +63,9 @@
   --radius-frame: 12px;
   --radius-panel: 20px;
   --radius-inset: 8px;
+  /* A work cover. Tighter than the lightbox's frames on purpose: at grid size
+     a 12px corner starts to read as a rounded button rather than a photo. */
+  --radius-card: 8px;
 
   /*
    * Two curves and nothing else. `soft` is the enter/exit curve for anything
@@ -88,11 +91,16 @@
   --nav-rest: oklch(0.888 0.003 88);
 
   /*
-   * The page is a single measured width, and several things that sit outside
-   * the container still have to line up with its left edge — the project
-   * rails, above all. Keeping the gutter in a variable is what lets them.
+   * The page is a single measured width, and everything on it lines up to
+   * that column's two edges.
+   *
+   * It is wide on purpose. Two covers side by side is the layout, and a
+   * reading-width container would hand each of them half of it — the work
+   * would arrive as thumbnails. 100rem stops short of unbounded so the covers
+   * don't turn into billboards on a very large display; below it, the page is
+   * the screen minus its gutter.
    */
-  --page-max: 76rem;
+  --page-max: 100rem;
   --page-pad: 1.25rem;
 
   /*
@@ -131,7 +139,7 @@
 
 @media (width >= 64rem) {
   :root {
-    --page-pad: 3.5rem;
+    --page-pad: 3rem;
   }
 }
 
@@ -218,55 +226,6 @@
 }
 
 /*
- * A project's images, as a horizontal rail.
- *
- * It starts flush with the page's left edge and runs off the right one, so
- * the next image is always half-visible — that peek is the whole affordance,
- * and it is why the rail carries no arrows or dots at rest.
- *
- * The start inset is derived rather than hard-coded: `100%` resolves against
- * the rail's own full-width parent, so it tracks the real gutter at every
- * width, including the extra margin once the viewport passes the page's
- * maximum. `scroll-padding` repeats it so a snapped image lands on that same
- * line instead of against the viewport edge.
- */
-@utility rail {
-  --inset: max(var(--page-pad), calc((100% - var(--page-max)) / 2 + var(--page-pad)));
-
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  padding-inline: var(--inset) var(--page-pad);
-  scroll-padding-inline-start: var(--inset);
-
-  /*
-   * While a mouse drag is live, `scroll-snap-type` fights every scrollLeft
-   * write the drag makes — mandatory snapping re-centres on the nearest
-   * frame the instant it's set by hand, so the rail visibly never moves.
-   * The component toggles this attribute on the element itself for exactly
-   * the duration of the drag; snapping comes back on release, and the rail
-   * settles onto the nearest frame the way it would after any other scroll.
-   */
-  &[data-dragging="true"] {
-    scroll-snap-type: none;
-  }
-
-  /* The peek is the scroll cue. A bar underneath would only repeat it. */
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  & > * {
-    flex: none;
-    scroll-snap-align: start;
-  }
-}
-
-/*
  * A smaller, plainer sibling of `.rail` for picking among a project's shots
  * inside the lightbox. Same drag-with-momentum handling via `useDragRail`
  * and the same snap-suspend-while-dragging trick, but scoped to the modal's
@@ -324,15 +283,21 @@
 }
 
 /*
- * A project's name. Sans rather than mono, and heavier: it is a title, not a
- * marker, and it has to lead the description sitting underneath it.
+ * The opening sentence, and the only large type on the page.
+ *
+ * It scales with the viewport rather than stepping at a breakpoint, because
+ * what has to hold is the line count — three lines under a wide band of air.
+ * The tracking comes in as the size goes up: Geist sets its default spacing
+ * for reading sizes, and at 2rem the same tracking leaves the sentence looking
+ * loose. `pretty` rather than `balance`, so the last line is allowed to run
+ * short instead of being evened out into a paragraph-shaped block.
  */
-@utility caps {
-  font-size: 0.75rem;
+@utility statement {
+  font-size: clamp(1.375rem, 1.05rem + 1.35vw, 2rem);
   line-height: 1.2;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-weight: 400;
+  text-wrap: pretty;
 }
 
 /*

@@ -7,8 +7,7 @@ import { SoundToggle } from "@/components/SoundToggle";
 import { Reveal } from "@/components/Reveal";
 import { Lightbox } from "@/components/Lightbox";
 import { Nav } from "@/components/Nav";
-import { Mark } from "@/components/Mark";
-import { ProjectRow, type Work } from "@/components/ProjectRow";
+import { ProjectCard, type Work } from "@/components/ProjectCard";
 import { Asterisk } from "@/components/icons";
 import { fetchWork } from "@/lib/sanity.server";
 
@@ -66,23 +65,19 @@ function Home() {
 
       <main id="top">
         {/*
-         * The introduction. A mark, two lines and a paragraph — everything
-         * else that used to live up here was the page talking about itself
-         * before it had shown anything.
+         * The introduction. One sentence, set large, held to a measure that
+         * breaks it over three lines and left to sit under a deep band of
+         * air — the page says who this is once and then gets out of the way
+         * of the work.
          */}
-        <section className="page pt-32 pb-14 sm:pt-40 sm:pb-16">
-          <div className="flex items-center gap-3.5 rise-in" style={at(0)}>
-            <Mark />
-            <div className="min-w-0">
-              <h1 className="text-[0.9375rem] leading-tight font-medium">Adiel Vásquez</h1>
-              <p className="text-[0.9375rem] leading-tight text-muted-foreground">
-                Independent brand &amp; web designer
-              </p>
-            </div>
-          </div>
+        <section className="page pt-40 pb-12 sm:pt-[15.5rem]">
+          <h1 className="statement max-w-[53rem] rise-in" style={at(0)}>
+            Adiel Vásquez is a multidisciplinary designer working across brand and web design for
+            modern brands to create clear, purposeful designs that thrive in the real world.
+          </h1>
 
           <p
-            className="mt-7 max-w-[52ch] text-[0.9375rem] leading-[1.62] text-prose rise-in"
+            className="mt-6 max-w-[52ch] text-[0.875rem] leading-[1.55] text-prose rise-in"
             style={at(1)}
           >
             I work with startups and studios on identities and websites with real character. I sit
@@ -102,22 +97,22 @@ function Home() {
         </section>
 
         {/*
-         * Work. Each project owns a full-width band: a rail of frames that
-         * runs off the right edge, and a caption under the first one. No
-         * grid — six small cards side by side was the version that turned
-         * the work into thumbnails.
+         * Work. Two columns of covers, each kept at the shape it was shot in,
+         * so the columns end at different heights instead of ruling a line
+         * across the page every row.
+         *
+         * `columns` rather than a grid of two hand-filled lists: multi-column
+         * balances the two by height on its own, and — the reason it wins —
+         * it leaves the cards in one flat source order, so the single column
+         * on a phone reads 1, 2, 3 and the tab order follows the eye down one
+         * column and back up the other. The trailing `-mb-*` swallows the row
+         * gap hanging off the last card in each column.
          */}
-        <section id="work" className="pb-24 sm:pb-32">
-          <div className="page">
-            <Reveal>
-              <SectionLabel>Selected work</SectionLabel>
-            </Reveal>
-          </div>
-
-          <div className="mt-6 flex flex-col gap-16 sm:gap-20">
+        <section id="work" className="page pb-24 sm:pb-32">
+          <div className="-mb-5 columns-1 gap-4 md:columns-2">
             {work.map((project) => (
-              <Reveal key={project.title}>
-                <ProjectRow work={project} onOpen={setGallery} />
+              <Reveal key={project.title} className="mb-5 break-inside-avoid">
+                <ProjectCard work={project} onOpen={setGallery} />
               </Reveal>
             ))}
           </div>
