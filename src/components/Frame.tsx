@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 /**
  * An image that fails invisibly.
@@ -22,11 +22,14 @@ export function Frame({
   alt,
   eager = false,
   className = "",
+  style,
 }: {
   src: string;
   alt: string;
   eager?: boolean;
   className?: string;
+  /** Mostly `aspect-ratio`, so the box is the right shape before it loads. */
+  style?: CSSProperties;
 }) {
   const ref = useRef<HTMLImageElement>(null);
   const [broken, setBroken] = useState(false);
@@ -58,6 +61,7 @@ export function Frame({
       loading={eager ? "eager" : "lazy"}
       decoding="async"
       className={className}
+      style={style}
     />
   );
 }

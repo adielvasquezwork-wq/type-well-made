@@ -5,12 +5,13 @@ const DATASET = "production";
 const API_VERSION = "2025-01-01";
 
 /** What the query actually returns: photos can be null, and carry no ratio. */
-type RawProject = Omit<Work, "images" | "ratio"> & { images?: (string | null)[] };
+type RawProject = Omit<Work, "images"> & { images?: (string | null)[] };
 
 /**
  * A Sanity asset URL ends in its own pixel size — `…-3040x2066.png`. Reading
- * the cover's ratio off that is what lets the grid reserve the right box
- * before the image arrives, so a column never reflows as it loads.
+ * each shot's ratio off that is what lets a grid reserve the right box before
+ * the image arrives, so nothing reflows as it loads — and it's also what tells
+ * the gallery which shots are wide enough to run the full width of the sheet.
  */
 function ratioOf(url: string | undefined): number | undefined {
   const size = url?.match(/-(\d+)x(\d+)\.\w+$/);
@@ -45,12 +46,10 @@ export async function fetchWork(): Promise<Work[]> {
     return result.map((project) => {
       // An image slot left empty in the Studio comes back as null, and a null
       // dropped into a `src` is a broken image on the page.
-      const images = (project.images ?? []).filter((src): src is string => Boolean(src));
-      return {
-        ...project,
-        ratio: ratioOf(images[0]),
-        images: images.map((src) => `${src}?w=1600&fit=max&auto=format`),
-      };
+      const images = (project.images ?? [])
+        .filter((src): src is string => Boolean(src))
+        .map((src) => ({ src: `${src}?w=1600&fit=max&auto=format`, ratio: ratioOf(src) }));
+      return { ...project, images };
     });
   } catch (error) {
     console.error("Sanity query failed:", error);
