@@ -93,8 +93,10 @@
   --hairline: oklch(0.945 0.001 90);
   /* The empty frame. A neutral grey, never a tinted one. */
   --placeholder: oklch(0.925 0.001 90);
-  /* The nav's resting fill — a flat, quiet grey a step below the placeholder. */
-  --nav-rest: oklch(0.888 0.003 88);
+  /* The nav's resting fill — a flat, quiet grey a step below the placeholder.
+     Light enough to sit back on the paper, opaque enough to carry the label
+     over whatever image is scrolling underneath it. */
+  --nav-rest: oklch(0.912 0.002 88);
 
   /*
    * The page is a single measured width, and everything on it lines up to
@@ -269,23 +271,54 @@
  *
  * It exists so a gallery can push the site back rather than cover it: scaled
  * down about the part of the viewport you were reading, corners rounded off,
- * colour drained and dimmed onto the near-black ground behind it. The scroll
- * offset the transform is measured from can only be known at the moment the
- * sheet opens, so `Lightbox` sets `transform-origin` and the clip inline; the
- * rest — including how any of it moves — is here.
+ * colour drained and dimmed onto the near-black ground behind it.
  *
  * The clip is what rounds the corners: the shell is as tall as the document,
  * so a border-radius would round the top and bottom of the *page*, metres
  * away, rather than the four corners of the screen you can see.
+ *
+ * Everything here is measured from `--sheet-scroll` — where the viewport sat
+ * when the sheet opened, the one value that can't be known until then, and
+ * the only thing `Lightbox` writes to this element.
  */
 #shell {
   min-height: 100dvh;
   background-color: var(--color-background);
+}
+
+/*
+ * A sheet exists — mounted, or on its way back out. Not "is open".
+ *
+ * The identity transform is load-bearing and must not be tidied away: a
+ * transformed element is what the fixed nav inside measures `top` from, and
+ * `--pinned-top` is only correct while that is true. Tying both to the same
+ * selector is what makes them change in one style recalc — set the offset a
+ * frame early and the nav drops to the middle of the screen; drop the
+ * transform a frame before the offset and it flies off the top. Neither can
+ * happen if a single attribute carries the two of them.
+ *
+ * It has to outlast `open` for the same reason: the transform is still
+ * mid-transition for 600ms after the sheet starts leaving, so the pin has to
+ * survive until the attribute goes altogether.
+ *
+ * The transition lives here rather than on `#shell` so that it is removed by
+ * the same keystroke that removes the transform. Left on `#shell` it would
+ * outlive its own subject: `transform` interpolates towards `none` as an
+ * identity matrix, so the shell goes on being a containing block for another
+ * 600ms after the pin has gone, and the nav spends them stuck to the top of
+ * the document rather than the top of the screen. With no transition
+ * declared at that point, the two end together.
+ */
+html[data-sheet] #shell {
   transition:
     transform 600ms var(--ease-sheet),
     clip-path 600ms var(--ease-sheet),
     opacity 600ms var(--ease-sheet),
     filter 300ms var(--ease-soft);
+  transform: translate(0);
+  transform-origin: 50% var(--sheet-scroll, 0px);
+  clip-path: xywh(0 var(--sheet-scroll, 0px) 100% 100dvh round 0px);
+  --pinned-top: var(--sheet-scroll, 0px);
 }
 
 html[data-sheet="open"] {
@@ -294,6 +327,7 @@ html[data-sheet="open"] {
 
 html[data-sheet="open"] #shell {
   transform: translateY(10px) scale(0.95);
+  clip-path: xywh(0 var(--sheet-scroll, 0px) 100% 100dvh round var(--radius-sheet));
   opacity: 0.4;
   filter: saturate(0.4);
 }
@@ -464,17 +498,21 @@ html[data-sheet="open"] #shell {
 }
 
 /*
- * The opening sentence, and the only large type on the page.
+ * The opening sentence, and now the only thing in the hero at all.
  *
- * It scales with the viewport rather than stepping at a breakpoint, because
- * what has to hold is the line count — three lines under a wide band of air.
- * The tracking comes in as the size goes up: Geist sets its default spacing
- * for reading sizes, and at 2rem the same tracking leaves the sentence looking
- * loose. `pretty` rather than `balance`, so the last line is allowed to run
- * short instead of being evened out into a paragraph-shaped block.
+ * One flat size at every width — 32px, 400, -0.03em, 120% — rather than type
+ * that scales with the viewport. A fluid headline is the more sophisticated
+ * mechanism and the wrong one here: what it buys is a constant line count,
+ * and the price is that the sentence is a slightly different size on every
+ * screen it lands on. Holding the size still and letting the line count fall
+ * where the measure puts it is the plainer decision, and plain is the whole
+ * argument of this page.
+ *
+ * `pretty` rather than `balance`, so the last line is allowed to run short
+ * instead of being evened out into a paragraph-shaped block.
  */
 @utility statement {
-  font-size: clamp(1.375rem, 1.05rem + 1.35vw, 2rem);
+  font-size: 2rem;
   line-height: 1.2;
   letter-spacing: -0.03em;
   font-weight: 400;
@@ -515,28 +553,37 @@ html[data-sheet="open"] #shell {
 
 /*
  * A section link in the nav — a flat, solid pill at rest rather than ghost
- * text, so it stays legible over whatever scrolls underneath the fixed
- * header without needing a blur to do it. Two fills only: a quiet neutral
- * grey at rest, and the same solid dark pill as `chip` for the section
- * you're currently reading. The header itself carries no fill of its own —
- * every bit of surface on the whole bar lives on these pills.
+ * text, so it stays legible over whatever scrolls underneath the fixed header
+ * without needing a blur to do it. The header itself carries no fill of its
+ * own; every bit of surface on the whole bar lives on these pills.
+ *
+ * One fill, and only one. The pill is the same quiet grey whether you are
+ * reading that section or not — what changes is the ink: muted for the
+ * sections you aren't in, full weight for the one you are. A solid black
+ * slab would answer "where am I" just as well and shout it, and in a bar
+ * this small that black next to Contact's black reads as two buttons
+ * competing rather than a location and an invitation. The strongest thing
+ * up here should be the one thing that wants a click.
  */
 @utility navlink {
   display: inline-flex;
   align-items: center;
   padding: 0.5rem 0.8125rem;
   border-radius: 999px;
-  color: var(--color-foreground);
+  /* `prose`, not `muted-foreground`: at 11px the label needs 4.5:1, and muted
+     ink on this pill measures 4.25. This clears it at 5.99 and still reads a
+     clear step back from the section you're in. */
+  color: var(--color-prose);
   background-color: var(--color-nav-rest);
   white-space: nowrap;
   transition:
     color 200ms var(--ease-strong),
     background-color 200ms var(--ease-strong),
-    box-shadow 200ms var(--ease-strong),
     transform 160ms var(--ease-strong);
 
   &:hover {
-    background-color: color-mix(in oklab, var(--color-nav-rest) 65%, var(--color-surface));
+    color: var(--color-foreground);
+    background-color: color-mix(in oklab, var(--color-nav-rest) 55%, var(--color-surface));
   }
 
   &:active {
@@ -544,9 +591,7 @@ html[data-sheet="open"] #shell {
   }
 
   &[data-current="true"] {
-    color: var(--color-background);
-    background-color: var(--color-foreground);
-    box-shadow: var(--elevation-card);
+    color: var(--color-foreground);
   }
 }
 
