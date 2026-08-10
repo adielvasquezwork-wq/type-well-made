@@ -156,7 +156,16 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        {/*
+         * Everything on the page lives inside one element so the gallery can
+         * push it back — scaled down, rounded off and dimmed — while a sheet
+         * slides up over it. That treatment has to apply to the whole site at
+         * once, including the fixed nav, which is only possible if the whole
+         * site is a single box. The sheet itself portals to <body>, landing
+         * outside this element, which is exactly what keeps it out of the
+         * transform. See `Lightbox`.
+         */}
+        <div id="shell">{children}</div>
         <Scripts />
       </body>
     </html>

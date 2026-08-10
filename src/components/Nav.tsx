@@ -45,8 +45,15 @@ export function Nav() {
     return () => io.disconnect();
   }, []);
 
+  /*
+   * `--pinned-top` is 0 for the site's whole ordinary life. It only moves
+   * while a gallery is open: the shell around this header is transformed
+   * then, which makes it — rather than the viewport — what `fixed` measures
+   * from, so the header has to be pushed down the document by the scroll
+   * offset to stay where it looks like it belongs. `Lightbox` sets it.
+   */
   return (
-    <header className="fixed inset-x-0 top-0 z-40">
+    <header className="fixed inset-x-0 top-[var(--pinned-top,0px)] z-40">
       <nav aria-label="Sections" className="page flex items-center justify-between gap-4 py-5">
         <ul className="flex items-center gap-1">
           {sections.map((section, i) => (

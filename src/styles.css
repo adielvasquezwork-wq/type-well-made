@@ -73,6 +73,12 @@
    */
   --ease-soft: cubic-bezier(0.2, 0, 0, 1);
   --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  /*
+   * The third, and it earns the exception: the gallery sheet is the only
+   * thing on the site that travels a whole screen. It leaves fast and lands
+   * long, which is what stops a full-height panel from reading as a jump cut.
+   */
+  --ease-sheet: cubic-bezier(0.5, 0.3, 0, 1);
 }
 
 :root {
@@ -102,6 +108,29 @@
    */
   --page-max: 100rem;
   --page-pad: 1.25rem;
+
+  /*
+   * The gallery sheet.
+   *
+   * `--ground` is what the page sits on. Normally that is the paper itself,
+   * so it is invisible; with a sheet open it goes near-black, and the page —
+   * scaled back and rounded off — sits on it like a card. Warm rather than
+   * neutral, because the paper is warm and a cold ground under it would read
+   * as two different lights in the same room.
+   *
+   * The sheet stops short of the top by `--sheet-top` rather than covering
+   * the screen: that strip of page is the whole reason the thing reads as a
+   * sheet and not a new page, and it's where you click to get out.
+   *
+   * `--sheet-max` is narrower than `--page-max` on purpose. The page runs
+   * wide because two covers side by side is its layout; the gallery is
+   * reading material, and photographs three feet across stop being read.
+   */
+  --ground: var(--background);
+  --ground-dim: oklch(0.335 0.002 60);
+  --sheet-top: max(20px, env(safe-area-inset-top));
+  --sheet-max: 78rem;
+  --radius-sheet: 24px;
 
   /*
    * Elevation is shadow, never a border. Two layers each: a tight contact
@@ -156,10 +185,18 @@
     scroll-behavior: smooth;
     /* The rails and the playground run past the right edge on purpose. */
     overflow-x: clip;
+    /*
+     * The ground the whole site sits on. The same colour as the paper until
+     * a gallery opens, so for almost all of the site's life this is a
+     * background nobody ever sees.
+     */
+    background-color: var(--ground);
+    transition: background-color 250ms var(--ease-soft);
   }
 
   body {
-    background-color: var(--color-background);
+    /* Transparent, so the ground above shows through around the shell. */
+    background-color: transparent;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 1rem;
@@ -225,31 +262,175 @@
   padding-inline: var(--page-pad);
 }
 
-/*
- * A smaller, plainer sibling of `.rail` for picking among a project's shots
- * inside the lightbox. Same drag-with-momentum handling via `useDragRail`
- * and the same snap-suspend-while-dragging trick, but scoped to the modal's
- * own width rather than the page's — it has no need for `.rail`'s
- * bleed-past-the-edge inset math, since with three or four thumbnails it
- * usually doesn't even overflow.
- */
-@utility thumb-rail {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
+/* ── The gallery sheet ─────────────────────────────────────────────────── */
 
-  &::-webkit-scrollbar {
+/*
+ * The whole site, as one box.
+ *
+ * It exists so a gallery can push the site back rather than cover it: scaled
+ * down about the part of the viewport you were reading, corners rounded off,
+ * colour drained and dimmed onto the near-black ground behind it. The scroll
+ * offset the transform is measured from can only be known at the moment the
+ * sheet opens, so `Lightbox` sets `transform-origin` and the clip inline; the
+ * rest — including how any of it moves — is here.
+ *
+ * The clip is what rounds the corners: the shell is as tall as the document,
+ * so a border-radius would round the top and bottom of the *page*, metres
+ * away, rather than the four corners of the screen you can see.
+ */
+#shell {
+  min-height: 100dvh;
+  background-color: var(--color-background);
+  transition:
+    transform 600ms var(--ease-sheet),
+    clip-path 600ms var(--ease-sheet),
+    opacity 600ms var(--ease-sheet),
+    filter 300ms var(--ease-soft);
+}
+
+html[data-sheet="open"] {
+  --ground: var(--ground-dim);
+}
+
+html[data-sheet="open"] #shell {
+  transform: translateY(10px) scale(0.95);
+  opacity: 0.4;
+  filter: saturate(0.4);
+}
+
+/*
+ * A project's photographs, over the page rather than instead of it.
+ *
+ * Full width, the paper's own colour, held off the top edge so the pushed-back
+ * page still shows above it. It scrolls itself — `contain` so reaching the
+ * bottom doesn't start scrolling the page underneath, `pan-y` so a horizontal
+ * swipe is left to the browser and a vertical one can be read as a drag.
+ */
+@utility sheet {
+  position: fixed;
+  inset: var(--sheet-top) 0 0 0;
+  height: calc(100dvh - var(--sheet-top));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background-color: var(--color-background);
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  will-change: transform;
+  transform: translateY(100%);
+  transition: transform 450ms var(--ease-sheet);
+
+  &[data-open="true"] {
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Two columns, and the shots keep the shapes they were shot in — so the rows
+ * end ragged, which is the point. One column until there is room for two;
+ * anything wide takes both (see `isFullWidth` in `Lightbox`).
+ *
+ * The inline padding is a floor, not a fixed value: it holds the gutter on
+ * small screens and turns into whatever centring `--sheet-max` needs once the
+ * sheet is wider than that.
+ */
+@utility sheet-grid {
+  display: grid;
+  grid-template-columns: 100%;
+  gap: 0.5rem;
+  margin-inline: auto;
+  width: 100%;
+  padding-block: clamp(1.5rem, 0.75rem + 3.2vw, 4rem);
+  padding-inline: max(clamp(0.75rem, 0.37rem + 1.6vw, 2rem), calc((100% - var(--sheet-max)) / 2));
+
+  @media (width >= 48rem) {
+    gap: 1.5rem;
+    /* Two real columns, not `1fr 1fr` — the gap is already in the maths, and
+       a shot spanning both has to land on exactly 100%. */
+    grid-template-columns: repeat(2, calc(50% - 0.75rem));
+
+    & > .sheet-media-wide {
+      grid-column: span 2;
+    }
+  }
+}
+
+@utility sheet-media {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-frame);
+}
+
+/*
+ * The close button, pinned to the top-right of the sheet as it scrolls.
+ *
+ * A zero-height sticky strip rather than a fixed button, so the button
+ * belongs to the sheet and travels with it — dragged down on a touchscreen,
+ * it goes too, instead of hanging in the air over a sheet that has left.
+ */
+@utility sheet-pin {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 0;
+
+  & > button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    width: 3.125rem;
+    border-radius: 100%;
+    background-color: var(--color-surface);
+    color: var(--color-foreground);
+    box-shadow: var(--elevation-card);
+    transition:
+      transform 800ms var(--ease-strong),
+      box-shadow 800ms var(--ease-strong);
+
+    @media (width >= 48rem) {
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 3.25rem;
+    }
+
+    /* It shrinks under the cursor rather than growing. A button that pushes
+       back is the one gesture that reads as "press" without a label. */
+    &:hover,
+    &:focus-visible,
+    &:active {
+      transform: scale(0.95);
+      box-shadow: var(--elevation-lift);
+    }
+  }
+}
+
+/*
+ * The grab bar. Only where there is a finger to grab it with — on a pointer
+ * the close button is the affordance, and a handle that can't be dragged is
+ * just decoration.
+ */
+@utility sheet-handle {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  margin-bottom: -1.75rem;
+
+  @media (hover: hover) {
     display: none;
   }
 
-  &[data-dragging="true"] {
-    scroll-snap-type: none;
-  }
-
-  & > * {
-    scroll-snap-align: start;
+  & > span {
+    width: 42px;
+    height: 5px;
+    border-radius: 999px;
+    background-color: var(--color-nav-rest);
   }
 }
 

@@ -1,5 +1,15 @@
 import { Frame } from "@/components/Frame";
 
+/** One photo, and the shape it was shot in. */
+export type Shot = {
+  src: string;
+  /**
+   * Width ÷ height. Reserves the box before the image loads, and decides how
+   * much of the gallery's width the shot is given — see `Lightbox`.
+   */
+  ratio?: number;
+};
+
 export type Work = {
   title: string;
   /** The one line that says why the project exists. Read in the gallery. */
@@ -7,9 +17,7 @@ export type Work = {
   /** What the project was — "Brand, Web, Naming". Sits opposite the title. */
   tags?: string[];
   /** Everything shot for the project. The first one is the cover. */
-  images?: string[];
-  /** The cover's own width ÷ height, so its box is reserved before it loads. */
-  ratio?: number;
+  images?: Shot[];
   /** Appended to the title, and shown in the empty frame — "Coming Soon". */
   pending?: string;
 };
@@ -40,7 +48,7 @@ export function ProjectCard({ work, onOpen }: { work: Work; onOpen: (work: Work)
   const tags = work.tags?.length ? work.tags.join(", ") : null;
 
   const frame = "image-edge overflow-hidden rounded-card bg-placeholder";
-  const box = { aspectRatio: `${work.ratio ?? FALLBACK_RATIO}` };
+  const box = { aspectRatio: `${cover?.ratio ?? FALLBACK_RATIO}` };
 
   return (
     <article>
@@ -53,7 +61,7 @@ export function ProjectCard({ work, onOpen }: { work: Work; onOpen: (work: Work)
           style={box}
         >
           <Frame
-            src={cover}
+            src={cover.src}
             alt={`${work.title} — cover`}
             className="h-full w-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.015]"
           />
