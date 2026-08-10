@@ -60,10 +60,6 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
   const closeRef = useRef<HTMLButtonElement>(null);
   // Whatever was focused when the gallery opened, so it can be handed back.
   const returnRef = useRef<HTMLElement | null>(null);
-  // Where the page was left. The clip and the pinned nav are both measured
-  // from it, and it can't be re-read later: locking the scroll keeps
-  // `scrollY` truthful, but nothing else here should have to assume that.
-  const topRef = useRef(0);
   const dismissed = useRef(false);
   // The browser chrome's colour before the sheet borrowed it.
   const paperRef = useRef("");
@@ -75,19 +71,20 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
     window.setTimeout(onClose, SHELL_MS);
   }, [onClose]);
 
-  // Freeze the page and set up the two things the shell's own transition
-  // can't know on its own: where the viewport currently sits in the document.
+  // Freeze the page and hand the stylesheet the one thing it can't know on its
+  // own: where the viewport sits in the document.
   //
   // The shell is the full height of the document, so scaling it about its own
-  // centre would push whatever you were reading off-screen. Both the origin
-  // and the clip are measured from the scroll offset instead, which is what
-  // makes the page shrink around the part of it you were actually looking at.
+  // centre would push whatever you were reading off-screen. The origin, the
+  // clip and the nav's offset are all measured from the scroll position
+  // instead, which is what makes the page shrink around the part of it you
+  // were actually looking at. `data-sheet` alone drives the rest — see the
+  // `#shell` rules in styles.css for why those move together.
   useEffect(() => {
     const html = document.documentElement;
     const { body } = document;
     const shell = document.getElementById("shell");
     const top = window.scrollY;
-    topRef.current = top;
 
     // Padding compensates for the scrollbar the lock removes, so the page
     // underneath doesn't shift sideways as the sheet opens.
@@ -106,14 +103,11 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
     if (shell) {
       // Nothing behind the sheet can be clicked, tabbed to or read out.
       shell.inert = true;
-      // The nav is fixed, and a transformed shell becomes the thing its
-      // fixed children measure from — so it has to be pushed down the
-      // document by the scroll offset to stay at the top of the viewport.
-      shell.style.setProperty("--pinned-top", `${top}px`);
-      shell.style.transformOrigin = `50% ${top}px`;
-      // The "from" half of the corner rounding. A transition needs both.
-      shell.style.clipPath = `xywh(0 ${top}px 100% 100dvh round 0px)`;
+      shell.style.setProperty("--sheet-scroll", `${top}px`);
     }
+    // Present but not yet open: the resting half of every transition, and the
+    // state the page comes back to on the way out.
+    html.setAttribute("data-sheet", "ready");
 
     return () => {
       html.style.overflow = prev.htmlOverflow;
@@ -135,15 +129,16 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // Push the page back, and pull it forward again on the way out.
+  // Push the page back, and pull it forward again on the way out. Back to
+  // `ready` rather than nothing: the shell has to keep its transform for as
+  // long as the return journey lasts, or the nav loses what it is pinned to
+  // halfway through it.
   useEffect(() => {
     if (!entered) return;
     const html = document.documentElement;
     const shell = document.getElementById("shell");
-    const radius = closing ? "0px" : "24px";
 
-    if (closing) html.removeAttribute("data-sheet");
-    else html.setAttribute("data-sheet", "open");
+    html.setAttribute("data-sheet", closing ? "ready" : "open");
 
     // On a phone the browser's own chrome sits directly above the strip of
     // ground the sheet leaves showing, so it has to change colour too — a
@@ -158,12 +153,12 @@ export function Lightbox({ gallery, onClose }: { gallery: Gallery; onClose: () =
       }
     }
 
-    // Cleared by the drag handler while a finger is down; put back either way.
+    // Hand the shell back to the stylesheet — the drag handler overrides these
+    // inline while a finger is down, and either outcome ends here.
     if (shell) {
       shell.style.transition = "";
       shell.style.transform = "";
       shell.style.opacity = "";
-      shell.style.clipPath = `xywh(0 ${topRef.current}px 100% 100dvh round ${radius})`;
     }
   }, [entered, closing]);
 

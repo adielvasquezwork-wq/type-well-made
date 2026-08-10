@@ -8,7 +8,6 @@ import { Reveal } from "@/components/Reveal";
 import { Lightbox } from "@/components/Lightbox";
 import { Nav } from "@/components/Nav";
 import { ProjectCard, type Work } from "@/components/ProjectCard";
-import { Asterisk } from "@/components/icons";
 import { fetchWork } from "@/lib/sanity.server";
 
 /** Runs only on the server, so the Sanity project needs no CORS setup. */
@@ -65,35 +64,15 @@ function Home() {
 
       <main id="top">
         {/*
-         * The introduction. One sentence, set large, held to a measure that
-         * breaks it over three lines and left to sit under a deep band of
-         * air — the page says who this is once and then gets out of the way
-         * of the work.
+         * The introduction. One sentence and nothing else, set at a single
+         * size and left to sit under a deep band of air — the page says who
+         * this is once and then gets out of the way of the work.
          */}
         <section className="page pt-40 pb-12 sm:pt-[15.5rem]">
           <h1 className="statement max-w-[53rem] rise-in" style={at(0)}>
             Adiel Vásquez is a multidisciplinary designer working across brand and web design for
             modern brands to create clear, purposeful designs that thrive in the real world.
           </h1>
-
-          <p
-            className="mt-6 max-w-[52ch] text-[0.875rem] leading-[1.55] text-prose rise-in"
-            style={at(1)}
-          >
-            I work with startups and studios on identities and websites with real character. I sit
-            on the{" "}
-            <a
-              className="link inline-flex items-baseline gap-1"
-              href="https://www.awwwards.com/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Asterisk className="size-3 translate-y-px self-center" />
-              Awwwards
-            </a>{" "}
-            Young Jury, care <em className="stress text-foreground">deeply</em> about craft and
-            quality, and like to make people feel something through my work.
-          </p>
         </section>
 
         {/*
