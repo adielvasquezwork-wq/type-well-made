@@ -1,14 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { useState } from "react";
 import type { CSSProperties } from "react";
+import { Frame } from "@/components/Frame";
 import { LocalTime } from "@/components/LocalTime";
-import { SoundToggle } from "@/components/SoundToggle";
+import { Mark } from "@/components/Mark";
+import type { Work } from "@/components/ProjectCard";
 import { Reveal } from "@/components/Reveal";
-import { Lightbox } from "@/components/Lightbox";
-import { Nav } from "@/components/Nav";
-import { ProjectCard, type Work } from "@/components/ProjectCard";
 import { fetchWork } from "@/lib/sanity.server";
+
+/**
+ * THE HOME PAGE — a temporary index.
+ *
+ * A one-pager for the stretch where the work exists and the case studies
+ * don't. The page this replaced was built around projects you click into,
+ * which only works once there is something behind the click. This one drops
+ * that idea entirely and shows the pictures themselves, each captioned with a
+ * name and a discipline and nothing more. It is the oldest portfolio format
+ * there is — a contact sheet — and it is the one format that costs nothing to
+ * fill.
+ *
+ * It reads the same Sanity projects the old page read, so there is no second
+ * place to keep content up to date: every photo in the Studio becomes one
+ * tile here, in the order they are filed. Upload a shot and it appears.
+ *
+ * TO PUT THE OLD HOME PAGE BACK: revert the commit that moved this file here.
+ * That restores the project cards, the gallery sheet and the section nav in
+ * one step — `Nav`, `Lightbox` and `SoundToggle` are all still in the repo,
+ * dormant, waiting for it.
+ */
 
 /** Runs only on the server, so the Sanity project needs no CORS setup. */
 const getWork = createServerFn({ method: "GET" }).handler(() => fetchWork());
@@ -31,151 +50,221 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: Home,
+  component: TemporaryIndex,
 });
 
 /**
- * Writing. Empty until there is some — a section that says so reads better
- * than three invented posts, and the empty state costs one array entry to
- * replace. Give an entry an `href` once a post has somewhere to live.
+ * The second line of a caption — what the project was, and when.
+ *
+ * Keyed by the project's title in Sanity. Whatever you type here is printed
+ * as-is, so a year is just more text: `"Brand Identity, 2025"`. A project
+ * with no entry shows its name alone, which is a caption too, not a hole.
+ *
+ * Sanity wins when it has something to say: fill a project's **Disciplines**
+ * field in the Studio and that is used instead of the line below, and the
+ * line below can then be deleted.
  */
-const notes: { title: string; date: string; href?: string }[] = [];
+const disciplines: Record<string, string> = {
+  Serveo: "Naming, Identity, Web",
+  Grain: "Brand Identity",
+};
 
-/** Sets the entrance delay slot for an introduction block. */
+/** Where to find him. The rail's last block, and the only ask on the page. */
+const elsewhere = [
+  { label: "hello@adiel.design", href: "mailto:hello@adiel.design" },
+  { label: "Twitter", href: "https://x.com/adieldesign" },
+  { label: "Cosmos", href: "https://www.cosmos.so/adiell" },
+  { label: "Savee", href: "https://savee.com/theadielv_/" },
+];
+
+/** Used only for a photo whose URL didn't carry its pixel size. */
+const FALLBACK_RATIO = 4 / 3;
+
+/** Sets the entrance delay slot for a block in the rail. */
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
+/** One picture on the page, with everything it needs to be captioned. */
+type Shot = {
+  key: string;
+  src: string;
+  /** Width ÷ height. Holds the box open at the right shape before it loads. */
+  ratio: number;
+  title: string;
+  caption: string | null;
+  /** Which shot of the project this is — alt text only. */
+  index: number;
+  total: number;
+};
+
 /**
- * Section marker. Just the word — the rule that used to finish it was one
- * more line on a page whose whole argument is that there aren't many.
+ * Projects in, pictures out.
+ *
+ * The page this replaced took one cover per project and hid the rest behind
+ * a click. Here every photo is its own tile, which is the whole trick: four
+ * shots of one identity fill four slots in the grid, so a body of work that
+ * is two projects deep still reads as a page of work.
  */
-function SectionLabel({ children }: { children: string }) {
-  return <h2 className="label text-muted-foreground">{children}</h2>;
+function toShots(work: Work[]): Shot[] {
+  return work.flatMap((project) => {
+    // Titles are typed by hand in the Studio and arrive with whatever
+    // whitespace came with them; the caption map is keyed on the clean one.
+    const title = project.title.trim();
+    const caption = project.tags?.length ? project.tags.join(", ") : (disciplines[title] ?? null);
+    const images = project.images ?? [];
+
+    return images.map((image, i) => ({
+      key: `${title}-${i}`,
+      src: image.src,
+      ratio: image.ratio ?? FALLBACK_RATIO,
+      title,
+      caption,
+      index: i + 1,
+      total: images.length,
+    }));
+  });
 }
 
-function Home() {
+function TemporaryIndex() {
   // Cast: the loader always resolves to Work[] (see getWork above), but the
   // router's generic inference doesn't carry that through on this route.
-  const work = Route.useLoaderData() as Work[];
-  const [gallery, setGallery] = useState<Work | null>(null);
+  const shots = toShots(Route.useLoaderData() as Work[]);
 
   return (
-    <>
-      <Nav />
+    <main className="page flex min-h-dvh flex-col pt-10 pb-10 sm:pt-12">
+      {/* The page shows no heading — the portfolios it follows don't, and a
+          title above a contact sheet is a caption for something that captions
+          itself. It still needs one for a screen reader and a search result,
+          and as the site's front door that heading is who this is. */}
+      <h1 className="sr-only">Adiel Vásquez — independent brand and web designer</h1>
 
-      <main id="top">
-        {/*
-         * The introduction. One sentence and nothing else, set at a single
-         * size and left to sit under a deep band of air — the page says who
-         * this is once and then gets out of the way of the work.
-         */}
-        <section className="page pt-40 pb-12 sm:pt-[15.5rem]">
-          <h1 className="statement max-w-[53rem] rise-in" style={at(0)}>
+      {/*
+       * Two columns that do different jobs. The left one is the whole of the
+       * writing — who this is, and where to reach him — and it sticks, so
+       * both stay on screen for the entire scroll rather than leaving at the
+       * first row of pictures. The right one is work, and nothing else.
+       *
+       * Proportional rather than a fixed rail width: at 2.6:1 the text column
+       * lands between about 240 and 400px at every size it is used, which
+       * keeps the measure readable without ever taking width off the work.
+       */}
+      <div className="grid gap-y-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.6fr)] lg:gap-x-16">
+        <aside className="lg:sticky lg:top-12 lg:flex lg:h-[calc(100dvh-6rem)] lg:flex-col lg:justify-between lg:gap-12">
+          <div className="rise-in" style={at(0)}>
+            <Mark />
+          </div>
+
+          {/*
+           * One paragraph in two tones. The first sentence is the claim and
+           * is set in full ink; the second is the housekeeping — why there
+           * are no case studies behind these pictures — and steps back into
+           * grey. Saying it plainly costs one sentence and is worth more than
+           * a page of placeholders pretending to be writing.
+           */}
+          <p
+            className="rise-in mt-12 max-w-[36ch] text-[0.9375rem] leading-[1.62] lg:mt-0"
+            style={at(1)}
+          >
             Adiel Vásquez is a multidisciplinary designer working across brand and web design for
-            modern brands to create clear, purposeful designs that thrive in the real world.
-          </h1>
-        </section>
+            modern brands to create clear, purposeful designs that thrive in the real world.{" "}
+            <span className="text-muted-foreground">
+              Full case studies are on the way. This is a short index of recent work in the
+              meantime.
+            </span>
+          </p>
+
+          <nav aria-label="Elsewhere" className="rise-in mt-12 lg:mt-0" style={at(2)}>
+            <ul className="label flex flex-wrap gap-x-7 gap-y-3 lg:flex-col lg:items-start lg:gap-y-3">
+              {elsewhere.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    {...(item.href.startsWith("http")
+                      ? { target: "_blank", rel: "noreferrer" }
+                      : {})}
+                    className="link transition-opacity duration-200 ease-strong hover:opacity-60"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
 
         {/*
-         * Work. Two columns of covers, each kept at the shape it was shot in,
-         * so the columns end at different heights instead of ruling a line
-         * across the page every row.
+         * The contact sheet. Two columns of pictures, each kept at the shape
+         * it was shot in, so the columns end at different heights instead of
+         * ruling a line across the page every row — the ragged bottom is what
+         * makes a grid of pictures read as work rather than as tiles.
          *
-         * `columns` rather than a grid of two hand-filled lists: multi-column
-         * balances the two by height on its own, and — the reason it wins —
-         * it leaves the cards in one flat source order, so the single column
-         * on a phone reads 1, 2, 3 and the tab order follows the eye down one
-         * column and back up the other. The trailing `-mb-*` swallows the row
-         * gap hanging off the last card in each column.
+         * `columns` rather than a two-item grid, for the same reason the home
+         * page uses it: multi-column balances the two by height on its own,
+         * and it leaves the tiles in one flat source order, so the single
+         * column on a phone reads 1, 2, 3.
+         *
+         * Nothing here is a link. There is nowhere to click through to yet,
+         * and a tile that lifts under the cursor and then does nothing is a
+         * worse promise than a tile that sits still.
          */}
-        <section id="work" className="page pb-24 sm:pb-32">
-          <div className="-mb-5 columns-1 gap-4 md:columns-2">
-            {work.map((project) => (
-              <Reveal key={project.title} className="mb-5 break-inside-avoid">
-                <ProjectCard work={project} onOpen={setGallery} />
+        {shots.length ? (
+          <div className="-mb-10 columns-1 gap-6 sm:columns-2">
+            {shots.map((shot, i) => (
+              <Reveal
+                key={shot.key}
+                delay={Math.min(i, 3) * 90}
+                className="mb-10 break-inside-avoid"
+              >
+                <figure>
+                  <div
+                    className="image-edge overflow-hidden rounded-card bg-placeholder"
+                    style={{ aspectRatio: `${shot.ratio}` }}
+                  >
+                    <Frame
+                      src={shot.src}
+                      alt={`${shot.title} — ${shot.index} of ${shot.total}`}
+                      // Roughly the first screen — which tiles that is depends
+                      // on how the columns balance, so it is a guess, but a
+                      // cheap one: the rest stay lazy.
+                      eager={i < 4}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <figcaption className="mt-3">
+                    <span className="block text-[0.875rem] leading-[1.5] font-medium">
+                      {shot.title}
+                    </span>
+                    {shot.caption ? (
+                      <span className="block text-[0.875rem] leading-[1.5] text-muted-foreground">
+                        {shot.caption}
+                      </span>
+                    ) : null}
+                  </figcaption>
+                </figure>
               </Reveal>
             ))}
           </div>
-        </section>
+        ) : (
+          /* The Studio is empty, or the fetch failed. Either way, say so
+             quietly rather than leaving the page looking half-painted. */
+          <p className="max-w-[46ch] text-[0.9375rem] leading-[1.62] text-prose">
+            The work isn’t loading right now. Email is the fastest way to see it in the meantime.
+          </p>
+        )}
+      </div>
 
-        <section id="thoughts" className="page pb-24 sm:pb-32">
-          <Reveal>
-            <SectionLabel>Thoughts</SectionLabel>
-          </Reveal>
-
-          <Reveal>
-            {notes.length ? (
-              <ul className="mt-6 max-w-[58ch]">
-                {notes.map((note) => {
-                  const row = (
-                    <>
-                      <span className="text-[0.9375rem]">{note.title}</span>
-                      <span className="label shrink-0 text-muted-foreground">{note.date}</span>
-                    </>
-                  );
-                  return (
-                    <li key={note.title} className="border-b border-hairline last:border-0">
-                      {note.href ? (
-                        <a
-                          href={note.href}
-                          className="group flex items-baseline justify-between gap-6 py-4 transition-opacity duration-200 ease-strong hover:opacity-60"
-                        >
-                          {row}
-                        </a>
-                      ) : (
-                        <div className="flex items-baseline justify-between gap-6 py-4">{row}</div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="mt-6 max-w-[46ch] text-[0.9375rem] leading-[1.62] text-prose">
-                Notes on craft, process and the things that don’t fit in a case study. The first one
-                is coming.
-              </p>
-            )}
-          </Reveal>
-        </section>
-
-        <footer className="page pb-16">
-          <div className="flex flex-col gap-8 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <nav
-              aria-label="Elsewhere"
-              className="label flex flex-wrap items-center gap-x-7 gap-y-4"
-            >
-              {[
-                { label: "Contact", href: "mailto:hello@adiel.design" },
-                { label: "Twitter", href: "https://x.com/adieldesign" },
-                { label: "Cosmos", href: "https://www.cosmos.so/adiell" },
-                { label: "Savee", href: "https://savee.com/theadielv_/" },
-              ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  {...(item.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
-                  className="link transition-opacity duration-200 ease-strong hover:opacity-60"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-
-            <div className="label flex items-center gap-6 text-muted-foreground">
-              <SoundToggle />
-              <p>
-                <LocalTime /> MDT
-              </p>
-            </div>
-          </div>
-        </footer>
-      </main>
-
-      {gallery?.images ? (
-        <Lightbox
-          gallery={{ title: gallery.title, blurb: gallery.blurb, images: gallery.images }}
-          onClose={() => setGallery(null)}
-        />
-      ) : null}
-    </>
+      {/* `mt-auto` so the footer sits on the bottom of the screen on a short
+          page, and at the end of the pictures on a long one. The padding runs
+          deliberately long: the grid above ends on a negative margin that eats
+          40px of whatever is set here. */}
+      <footer className="mt-auto pt-28 sm:pt-36">
+        <div className="label flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-hairline pt-6 text-muted-foreground">
+          <p>Adiel Vásquez — 2026</p>
+          <p>
+            <LocalTime /> MDT
+          </p>
+        </div>
+      </footer>
+    </main>
   );
 }
